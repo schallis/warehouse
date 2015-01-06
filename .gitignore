@@ -1,0 +1,15 @@
+.DS_Store
+*.pyc
+*.pyo
+.project
+.pydevproject
+local_settings.py
+
+.coverage
+nosetests.xml
+htmlcov/
+coverage.xml
+pylint.txt
+pep8.txt
+
+*env_vars
