@@ -12,10 +12,15 @@ from django.contrib.sites.models import Site
 
 from dateutil import parser
 
+
 log = logging.getLogger(__name__)
+
+def raise_invalid():
+    raise RuntimeError('Credentials not configured. Please set env variables BORK_TOKEN and BORK_USERNAME')
 
 PAGE_TOKEN = '__page'
 LIMIT_TOKEN = '__page_size'
+ZONZA_SITE='teamhills.zonza.tv'
 BORK_URL = 'http://api.zonza.tv:8080/v0/'
 BORK_AUTH = {
     'Bork-Token': os.environ.get('BORK_TOKEN') or raise_invalid(),
@@ -45,7 +50,7 @@ class Asset(ReportableModelMixin):
     objects = models.Manager()
     vidispine_objects = DamAssetManager()
     deleted = models.DateTimeField(blank=True, null=True)
-    vs_id = models.CharField(max_length=10)
+    vs_id = models.CharField(max_length=10, unique=True)
     filename = models.CharField(max_length=255, blank=True, null=True)
     username = models.CharField(max_length=255)
     created = models.DateTimeField()
@@ -63,6 +68,18 @@ class Asset(ReportableModelMixin):
             self.save()
 
 
+METADATA_MAPPING = (
+    ('title', 'StandardMetadata.title'),
+    ('broadcast_ready', 'StandardMetadata.broadcast_ready'),
+)
+
+
+class StandardMetadata(ReportableModelMixin):
+    """A record of standardized metadata on an asset"""
+    item = models.ForeignKey('reporting.Asset')
+
+
+
 class Download(ReportableModelMixin):
     """A record of each shape download"""
     item = models.ForeignKey('reporting.Asset')
@@ -75,7 +92,7 @@ class Shape(ReportableModelMixin):
     """A record of a Vidispine shape"""
     deleted = models.DateTimeField(blank=True, null=True)
     item = models.ForeignKey('reporting.Asset')
-    vs_id = models.CharField(max_length=10)
+    vs_id = models.CharField(max_length=10, unique=True)
     shapetag = models.CharField(max_length=255)
     timestamp = models.DateTimeField(blank=True, null=True)
     size = models.BigIntegerField()
@@ -83,10 +100,6 @@ class Shape(ReportableModelMixin):
 
     def __unicode__(self):
         return u'{} - {} (version {})'.format(self.vs_id, self.shapetag, self.version)
-
-
-def raise_invalid():
-    raise RuntimeError('Credentials not configured. Please set env variables BORK_TOKEN and BORK_USERNAME')
 
 
 def get_item_asset(url):
@@ -107,8 +120,6 @@ def get_item_assets(vs_id):
 
 def perform_search(runas, filters = None):
     """Query Vidispine for items"""
-    url = 'http://api.zonza.tv:8080/v0/'
-
     def raise_invalid():
         raise RuntimeError('Credentials not configured. Please set env variables BORK_TOKEN and BORK_USERNAME')
 
@@ -116,9 +127,9 @@ def perform_search(runas, filters = None):
      'Bork-Username': os.environ.get('BORK_USERNAME') or raise_invalid()}
     headers = {'content-type': 'application/json'}
     headers.update(auth)
-    params = {'zonza_site': 'deluxe.zonza.tv'}
+    params = {'zonza_site': ZONZA_SITE}
     params.update(filters)
-    response = GET('{}item'.format(url), params=params, headers=headers)
+    response = GET('{}item'.format(BORK_URL), params=params, headers=headers)
     json_response = json.loads(response.content)
     return json_response
 
@@ -534,12 +545,15 @@ def get_metadata_from_vidispine(asset_model, item):
 def create_shapes_from_vidispine(asset, item):
     item_id = item.get('id')
     item_shapes = get_item_assets(item_id).get('assets')
+    # check for only single shape
+    if hasattr(item_shapes, 'keys'):
+        item_shapes = (item_shapes,)
     for shape in item_shapes:
         url = shape['asset']
         metadata = get_item_asset(url)
         defaults = {'size': metadata.get('size', 0),
          'version': 0,
          'timestamp': None,
-         'shapetag': shape.get('tag', '<no shapetag>')}
+         'shapetag': shape}
         new_shape, created = Shape.objects.get_or_create(item=asset,
                 vs_id=metadata.get('id'), defaults=defaults)
