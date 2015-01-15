@@ -5,11 +5,25 @@ Warehouse
 :Authors: Steven Challis <steve@stevechallis.com>
 :Requires: Django >= 1.5 (see requirements.pip)
 
+Development
+-----------
+
+    mkvirtualenv warehouse
+    workon warehouse
+    pip install -r requirements
+    ./manage.py syncdb
+    ./manage.py migrate
+    ./manage.py sync_report_data
+    ./manage.py runserver 0.0.0.0:8000
+
+Then fire up `127.0.0.1:8000/admin`
+
+
 Usage
 -----
 The project primarily relies on the ``reporting`` app which is responsible for
 gathering and cleaning data. The ``reporting`` app has a command which
-syncs the entire 3rd party source to update the local tables::
+syncs the entire 3rd party source to update the local tables.
 
 The task can be also manually triggered from the webapp.
 
