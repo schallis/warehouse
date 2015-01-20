@@ -3,7 +3,7 @@ Warehouse
 
 :Info: A Django app to collect data from third party APIs into a reportable set of tables
 :Authors: Steven Challis <steve@stevechallis.com>
-:Requires: Django >= 1.5 (see requirements.pip)
+:Requires: Django >= 1.7 (see requirements.pip)
 
 Development
 -----------
