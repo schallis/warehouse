@@ -18,6 +18,7 @@ log = logging.getLogger(__name__)
 def raise_invalid():
     raise RuntimeError('Credentials not configured. Please set env variables BORK_TOKEN and BORK_USERNAME')
 
+PER_PAGE = 10
 PAGE_TOKEN = '__page'
 LIMIT_TOKEN = '__page_size'
 ZONZA_SITE='teamhills.zonza.tv'
@@ -55,8 +56,7 @@ class Asset(ReportableModelMixin):
     username = models.CharField(max_length=255)
     created = models.DateTimeField()
     sites = models.ManyToManyField('sites.Site')
-    size = models.BigIntegerField()
-    raw_metadata = jsonfield.JSONField()
+    raw_data = jsonfield.JSONField()
 
     def __unicode__(self):
         return u'{} - {} ({})'.format(self.vs_id, self.filename, self.username)
@@ -97,12 +97,14 @@ class Shape(ReportableModelMixin):
     timestamp = models.DateTimeField(blank=True, null=True)
     size = models.BigIntegerField()
     version = models.IntegerField()
+    raw_data = jsonfield.JSONField()
 
     def __unicode__(self):
         return u'{} - {} (version {})'.format(self.vs_id, self.shapetag, self.version)
 
 
-def get_item_asset(url):
+def get_asset(url):
+    """Retrieve full information for specific asset"""
     headers = {'content-type': 'application/json'}
     headers.update(BORK_AUTH)
     response = GET(url, headers=headers)
@@ -110,10 +112,19 @@ def get_item_asset(url):
     return json_response
 
 
-def get_item_assets(vs_id):
+def get_shapes_for_asset(asset_id):
+    """Retrieve individual transcodes"""
     headers = {'content-type': 'application/json'}
     headers.update(BORK_AUTH)
-    response = GET('{}item/{}/asset'.format(BORK_URL, vs_id), headers=headers)
+    response = GET('{}item/{}/asset'.format(BORK_URL, asset_id), headers=headers)
+    json_response = json.loads(response.content)
+    return json_response.get('assets')
+
+
+def get_shape(url):
+    headers = {'content-type': 'application/json'}
+    headers.update(BORK_AUTH)
+    response = GET('{}'.format(url), headers=headers)
     json_response = json.loads(response.content)
     return json_response
 
@@ -123,6 +134,7 @@ def perform_search(runas, filters = None):
     def raise_invalid():
         raise RuntimeError('Credentials not configured. Please set env variables BORK_TOKEN and BORK_USERNAME')
 
+    print 'PERFORMING', filters.get(PAGE_TOKEN)
     auth = {'Bork-Token': os.environ.get('BORK_TOKEN') or raise_invalid(),
      'Bork-Username': os.environ.get('BORK_USERNAME') or raise_invalid()}
     headers = {'content-type': 'application/json'}
@@ -220,11 +232,61 @@ class Fields(object):
         return self._set
 
 
+def item_iterator():
+    count = 0
+    consumed = 0
+    emitted = 0
+    existing = 0
+    msg = 'Synced {0}/{1} ({2} already existed)'
+    skip = 0
+    sync_message = lambda : msg.format(emitted, skip, count, existing)
+    per_page = PER_PAGE
+    filters = {LIMIT_TOKEN: per_page, PAGE_TOKEN: 1}
+    limit = per_page
+
+    def limit_met(count):
+        """Does the given count match or exceed the limit"""
+        return bool(limit and count >= limit)
+
+    while True:
+        item_offset, page = get_offsets(emitted, skip, per_page)
+        filters[PAGE_TOKEN] = page
+        try:
+            filters = filters
+            result = perform_search(runas=None, filters=filters)
+        except Exception as exc:
+            error = 'Error when searching for DamAsset: {0}'.format(exc)
+            raise
+
+        if not result.get('item'):
+            raise StopIteration
+        delay = int(getattr(settings, 'SYNC_CALL_DELAY', 0))
+        time.sleep(delay)
+        count = int(result.get('hits'))
+        for num, item in enumerate(result.get('item')):
+            consumed += 1
+            if num >= item_offset:
+                item_id = item['id']
+                vidi_ids = [{'id': item_id}]
+                try:
+                    emitted += 1
+                    yield (item, count)
+                except Exception as exc:
+                    error = 'Error when creating DamAsset: {0}'.format(exc)
+                    raise
+
+            hits = int(result.get('hits'))
+            if skip:
+                hits = hits - skip
+            if limit_met(emitted) or consumed >= hits:
+                raise StopIteration
+
+
 class BorkAssetQuerySet(models.query.QuerySet):
 
     def __init__(self, model = None, query = None, using = None):
         self._result_cache = []
-        self._precache_num = getattr(settings, 'VIDISPINE_PRECACHE_NUM', 15)
+        self._precache_num = getattr(settings, 'VIDISPINE_PRECACHE_NUM', 100)
         self._runas = None
         self._iter = None
         self._prefetch_related_lookups = []
@@ -259,8 +321,6 @@ class BorkAssetQuerySet(models.query.QuerySet):
         if args:
             raise TypeError('All fields must be specified as kwargs')
         filters = AdvancedSearch('AND', **kwargs).serialise()
-        self.filters.update(filters)
-        return self
 
     def __getitem__(self, k):
         """Retrieves an item or slice from the set of results"""
@@ -409,7 +469,7 @@ class BorkAssetQuerySet(models.query.QuerySet):
         self._options.update(kwargs)
         return self
 
-    def iterator(self):
+    def __iter__(self):
         """Lazily retrieve Vidispine search results, emitting assets"""
         consumed = 0
         emitted = 0
@@ -421,7 +481,6 @@ class BorkAssetQuerySet(models.query.QuerySet):
             self.filters[PAGE_TOKEN] = page
             try:
                 filters = self.filters
-                filters.update({'__rich': 'true'})
                 result = perform_search(self._runas, filters=filters)
             except Exception as exc:
                 error = 'Error when searching for DamAsset: {0}'.format(exc)
@@ -438,30 +497,32 @@ class BorkAssetQuerySet(models.query.QuerySet):
                     item_id = item['id']
                     vidi_ids = [{'id': item_id}]
                     try:
-                        if self._options.get('create_mode'):
-                            try:
-                                asset = self.model.objects.get(vs_id=item_id)
-                                created = False
-                            except self.model.DoesNotExist:
-                                metadata = get_metadata_from_vidispine(self.model, item)
-                                metadata['filename'] = item.get('id')
-                                asset = self.model.objects.create(vs_id=item_id, raw_metadata=item, **metadata)
-                                created = True
-
-                            if not created:
-                                existing += 1
-                            create_sites_for_item(asset, item)
-                            create_shapes_from_vidispine(asset, item)
-                            asset.update_size()
-                        else:
-                            existing += 1
-                            asset = self.model.objects.get(vs_id=item_id)
-                        asset.json = item
                         emitted += 1
-                        yield asset
-                    except self.model.DoesNotExist:
-                        msg = 'Asset {0} exists in Vidispine but not in here'
-                        raise ImproperlyConfigured(msg.format(vidi_ids))
+                        yield item
+                        #if self._options.get('create_mode'):
+                            #try:
+                                #asset = self.model.objects.get(vs_id=item_id)
+                                #created = False
+                            #except self.model.DoesNotExist:
+                                #metadata = get_metadata_from_vidispine(self.model, item)
+                                #metadata['filename'] = item.get('id')
+                                #asset = self.model.objects.create(vs_id=item_id, raw_metadata=item, **metadata)
+                                #created = True
+
+                            #if not created:
+                                #existing += 1
+                            #create_sites_for_item(asset, item)
+                            #create_shapes_from_vidispine(asset, item)
+                            #asset.update_size()
+                        #else:
+                            #existing += 1
+                            #asset = self.model.objects.get(vs_id=item_id)
+                        #asset.json = item
+                        #emitted += 1
+                        #yield asset
+                    #except self.model.DoesNotExist:
+                        #msg = 'Asset {0} exists in Vidispine but not in here'
+                        #raise ImproperlyConfigured(msg.format(vidi_ids))
                     except Exception as exc:
                         error = 'Error when creating DamAsset: {0}'.format(exc)
                         raise

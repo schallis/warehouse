@@ -36,7 +36,7 @@ class ShapeInline(admin.TabularInline):
 class AssetAdmin(ReadOnlyAdmin):
     actions = None
     inlines = ShapeInline,
-    list_display = ('vs_id', 'username', 'all_sites', 'size', 'storage_size')
+    list_display = ('vs_id', 'username', 'all_sites', 'storage_size')
 
     def storage_size(self, asd):
         total_bytes = asd.shape_set.aggregate(Sum('size'))['size__sum'] or 0
