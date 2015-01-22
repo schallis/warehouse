@@ -5,6 +5,7 @@ import json
 
 from django.utils import timezone
 from django.core.management.base import BaseCommand
+from django.contrib.sites.models import Site
 
 from reporting.models import (Asset, Shape, get_asset,
                               get_shapes_for_asset, get_shape, item_iterator)
@@ -57,10 +58,19 @@ class Command(BaseCommand):
                 'vs_id': asset_id,
                 'raw_data': json.dumps(full_asset_data),
                 'created': timezone.now().isoformat(),
+                'username': full_asset_data.get('user'),
             }
 
+            # Create asset
             item, created = Asset.objects.update_or_create(vs_id=asset_id, defaults=asset_fields)
 
+            # Link to sites
+            sites = [full_asset_data.get('zonza_site', '')]
+            for site in sites:
+                django_site, __ = Site.objects.get_or_create(name=site, domain=site)
+                asset.sites.add(django_site)
+
+            # Pull shapes out of each asset
             shapes = get_shapes_for_asset(asset_id)
             if hasattr(shapes, 'keys'):
                 shapes = (shapes,)
@@ -83,21 +93,15 @@ class Command(BaseCommand):
 
                 Shape.objects.update_or_create(vs_id=shape_id, defaults=shape_fields)
 
-            # Build list of VS (in memory) ids for later
-
-            # Pull shapes out of each asset
-
             # Check for assets that do not appear in API (i.e. have been deleted)
+            # Use some kind of flag in the db to delete anything not found in
+            # this run
 
-            # Report progress
+            # Report live progress
             done += 1
             update_progress(done, count)
 
         print "\n...Done!"
-
-        #objects = Asset.vidispine_objects.all()
-        #objects = objects.skip(skip)
-        #count = objects.count()
 
         time = timezone.now()
         print "Started at {0}".format(time)
