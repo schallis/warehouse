@@ -22,9 +22,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'warehouse',
-        'USER': 'stevenchallis',
-        'PASSWORD': '',
-        'HOST': '',
+        'USER': 'warehouse',
+        'PASSWORD': os.environ.get('DB_PASSWORD'),
+        'HOST': os.environ.get('DB_HOST'),
         'PORT': '',
     }
 }
