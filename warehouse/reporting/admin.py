@@ -24,7 +24,7 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 
 class ShapeInline(admin.TabularInline):
     model = models.Shape
-    fields = ('link', 'shapetag', 'size')
+    fields = ('link', 'shapetag', 'size', 'sync_uuid')
     readonly_fields = ('link', 'shapetag', 'size')
     extra = 0
 
@@ -36,7 +36,8 @@ class ShapeInline(admin.TabularInline):
 class AssetAdmin(ReadOnlyAdmin):
     actions = None
     inlines = ShapeInline,
-    list_display = ('vs_id', 'username', 'all_sites', 'storage_size')
+    list_display = ('vs_id', 'username', 'all_sites', 'storage_size',
+            'sync_uuid')
 
     def storage_size(self, asd):
         total_bytes = asd.shape_set.aggregate(Sum('size'))['size__sum'] or 0

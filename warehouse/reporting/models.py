@@ -16,12 +16,14 @@ from dateutil import parser
 log = logging.getLogger(__name__)
 
 def raise_invalid():
-    raise RuntimeError('Credentials not configured. Please set env variables BORK_TOKEN and BORK_USERNAME')
+    warning = 'Credentials not configured. ' \
+              'Please set env variables BORK_TOKEN and BORK_USERNAME'
+    raise RuntimeError(warning)
 
-PER_PAGE = 10
+PER_PAGE = 100
 PAGE_TOKEN = '__page'
 LIMIT_TOKEN = '__page_size'
-ZONZA_SITE='teamhills.zonza.tv'
+ZONZA_SITE='zonzacompany.zonza.tv'
 BORK_URL = 'http://api.zonza.tv:8080/v0/'
 BORK_AUTH = {
     'Bork-Token': os.environ.get('BORK_TOKEN') or raise_invalid(),
@@ -35,12 +37,13 @@ def GET(url, **kwargs):
 
 class DamAssetManager(models.Manager):
 
-    def get_query_set(self):
+    def get_queryset(self):
         return BorkAssetQuerySet(model=self.model, using=None)
 
 
 class ReportableModelMixin(models.Model):
     last_synced = models.DateTimeField(auto_now=True)
+    sync_uuid = models.CharField(max_length=32)
 
     class Meta:
         abstract = True
@@ -134,13 +137,13 @@ def perform_search(runas, filters = None):
     def raise_invalid():
         raise RuntimeError('Credentials not configured. Please set env variables BORK_TOKEN and BORK_USERNAME')
 
-    print 'PERFORMING', filters.get(PAGE_TOKEN)
+    log.debug('ZONZA API search request {}', filters)
     auth = {'Bork-Token': os.environ.get('BORK_TOKEN') or raise_invalid(),
      'Bork-Username': os.environ.get('BORK_USERNAME') or raise_invalid()}
     headers = {'content-type': 'application/json'}
     headers.update(auth)
     params = {'zonza_site': ZONZA_SITE}
-    params.update(filters)
+    params.update(filters or {})
     response = GET('{}item'.format(BORK_URL), params=params, headers=headers)
     json_response = json.loads(response.content)
     return json_response
@@ -242,11 +245,6 @@ def item_iterator():
     sync_message = lambda : msg.format(emitted, skip, count, existing)
     per_page = PER_PAGE
     filters = {LIMIT_TOKEN: per_page, PAGE_TOKEN: 1}
-    limit = per_page
-
-    def limit_met(count):
-        """Does the given count match or exceed the limit"""
-        return bool(limit and count >= limit)
 
     while True:
         item_offset, page = get_offsets(emitted, skip, per_page)
@@ -278,260 +276,8 @@ def item_iterator():
             hits = int(result.get('hits'))
             if skip:
                 hits = hits - skip
-            if limit_met(emitted) or consumed >= hits:
+            if consumed >= hits:
                 raise StopIteration
-
-
-class BorkAssetQuerySet(models.query.QuerySet):
-
-    def __init__(self, model = None, query = None, using = None):
-        self._result_cache = []
-        self._precache_num = getattr(settings, 'VIDISPINE_PRECACHE_NUM', 100)
-        self._runas = None
-        self._iter = None
-        self._prefetch_related_lookups = []
-        self._prefetch_done = False
-        self._count = None
-        self._limit = None
-        self._skip = 0
-        self._options = {'create_mode': True}
-        self.filters = {LIMIT_TOKEN: self._precache_num,
-         PAGE_TOKEN: 1}
-        super(BorkAssetQuerySet, self).__init__(model, query, using)
-
-    def __contains__(self, val):
-        raise NotImplementedError
-
-    def __and__(self, other):
-        raise NotImplementedError
-
-    def __or__(self, other):
-        raise NotImplementedError
-
-    def aggregate(self, *args, **kwargs):
-        raise NotImplementedError
-
-    def delete(self):
-        raise NotImplementedError
-
-    def update(self, **kwargs):
-        raise NotImplementedError
-
-    def __call__(self, *args, **kwargs):
-        if args:
-            raise TypeError('All fields must be specified as kwargs')
-        filters = AdvancedSearch('AND', **kwargs).serialise()
-
-    def __getitem__(self, k):
-        """Retrieves an item or slice from the set of results"""
-        if not isinstance(k, (slice, int, long)):
-            raise TypeError
-        assert not isinstance(k, slice) and k >= 0 or isinstance(k, slice) and (k.start is None or k.start >= 0) and (k.stop is None or k.stop >= 0), 'Negative indexing is not supported.'
-        if self._result_cache is not None:
-            if self._iter is not None:
-                if isinstance(k, slice):
-                    if k.stop is not None:
-                        bound = int(k.stop)
-                    else:
-                        bound = None
-                else:
-                    bound = k + 1
-                if len(self._result_cache) < bound:
-                    self._fill_cache(bound - len(self._result_cache))
-            return self._result_cache[k]
-        if isinstance(k, slice):
-            query_set = self
-            if k.start is not None:
-                start = int(k.start)
-            else:
-                start = None
-            if k.stop is not None:
-                stop = int(k.stop)
-            else:
-                stop = None
-            if stop:
-                query_set = query_set.limit(stop - (start or 0))
-            if start:
-                query_set = query_set.skip(start)
-            return k.step and list(query_set)[::k.step] or query_set
-        try:
-            query_set = self
-            query_set = query_set.limit(1)
-            query_set = query_set.skip(k)
-            return list(query_set)[0]
-        except self.model.DoesNotExist as exc:
-            raise IndexError(exc.args)
-
-    def runas(self, username):
-        """Set the user who the search is performed as"""
-        if not isinstance(username, basestring):
-            raise TypeError('runas must be a username string')
-        self._runas = username
-        return self
-
-    def _adjusted_count(self):
-        """Alter the raw _count param from Vidispine to take into
-        account limits set in this QuerySet
-        """
-        max_skip = self._skip
-        if self._count is not None:
-            max_skip = min(max_skip, self._count)
-        remainder = self._count - max_skip
-        return self._limit and min(remainder, self._limit) or remainder
-
-    def __len__(self):
-        """Evaluate the entire QuerySet and return its length"""
-        return len(list(self.__iter__()))
-
-    def all(self):
-        return self.__call__()
-
-    def skip(self, num):
-        """Ensure the queryset does not return the first `num` items"""
-        self._skip = num
-        return self
-
-    def next(self):
-        """Advance the result cache iterator by at least one"""
-        if not self._iter:
-            self._iter = self.iterator()
-        return next(self._iter)
-
-    def exists(self):
-        """Return a boolean indicating the existence of results"""
-        if self._result_cache is None:
-            self.limit(1)
-            exists = bool(self.next())
-            return exists
-        return bool(self._result_cache)
-
-    def count(self):
-        """Use cached information to calculate the count"""
-        if not self._count:
-            result = perform_search(self._runas, filters=self.filters)
-            self._count = int(result.get('hits'))
-        return self._adjusted_count()
-
-    def _result_iter(self):
-        """Iterate over the cache, populating it when necessary"""
-        pos = 0
-        while 1:
-            upper = len(self._result_cache)
-            while pos < upper:
-                yield self._result_cache[pos]
-                pos = pos + 1
-
-            if not self._iter:
-                raise StopIteration
-            if len(self._result_cache) <= pos:
-                self._fill_cache()
-
-    def _fill_cache(self, num = None):
-        """Populate the cache with the next set of precached results"""
-        if self._iter:
-            try:
-                for __ in range(num or self._precache_num):
-                    self._result_cache.append(next(self._iter))
-                    if self._limit_met(len(self._result_cache)):
-                        raise StopIteration
-
-            except StopIteration:
-                self._iter = None
-
-    def _limit_met(self, count):
-        """Does the given count match or exceed the limit"""
-        return bool(self._limit and count >= self._limit)
-
-    def limit(self, num):
-        """Cap the number of returned results to the specified limit"""
-        self._limit = num
-        return self
-
-    def filter(self, *args, **kwargs):
-        """Restrict the search to those whose field/value combinations
-        match the kwargs
-        """
-        if args:
-            raise TypeError('All fields must be specified as kwargs')
-        return self.__call__(**kwargs)
-
-    def order_by(self, *field_names):
-        """ TODO: implement ordering
-        Returns a new DamAssetQuerySet instance with the ordering changed.
-        """
-        assert self.query.can_filter(), 'Cannot reorder a query once a slice has been taken.'
-        return self._clone()
-
-    def options(self, *args, **kwargs):
-        """Set non action options on the queryset"""
-        if args:
-            raise TypeError('All fields must be specified as kwargs')
-        self._options.update(kwargs)
-        return self
-
-    def __iter__(self):
-        """Lazily retrieve Vidispine search results, emitting assets"""
-        consumed = 0
-        emitted = 0
-        existing = 0
-        msg = 'Synced {0}/{1} ({2} already existed)'
-        sync_message = lambda : msg.format(emitted, self._count, existing)
-        while True:
-            item_offset, page = get_offsets(emitted, self._skip, self._precache_num)
-            self.filters[PAGE_TOKEN] = page
-            try:
-                filters = self.filters
-                result = perform_search(self._runas, filters=filters)
-            except Exception as exc:
-                error = 'Error when searching for DamAsset: {0}'.format(exc)
-                raise
-
-            if not result.get('item'):
-                raise StopIteration
-            delay = int(getattr(settings, 'SYNC_CALL_DELAY', 0))
-            time.sleep(delay)
-            self._count = int(result.get('hits'))
-            for num, item in enumerate(result.get('item')):
-                consumed += 1
-                if num >= item_offset:
-                    item_id = item['id']
-                    vidi_ids = [{'id': item_id}]
-                    try:
-                        emitted += 1
-                        yield item
-                        #if self._options.get('create_mode'):
-                            #try:
-                                #asset = self.model.objects.get(vs_id=item_id)
-                                #created = False
-                            #except self.model.DoesNotExist:
-                                #metadata = get_metadata_from_vidispine(self.model, item)
-                                #metadata['filename'] = item.get('id')
-                                #asset = self.model.objects.create(vs_id=item_id, raw_metadata=item, **metadata)
-                                #created = True
-
-                            #if not created:
-                                #existing += 1
-                            #create_sites_for_item(asset, item)
-                            #create_shapes_from_vidispine(asset, item)
-                            #asset.update_size()
-                        #else:
-                            #existing += 1
-                            #asset = self.model.objects.get(vs_id=item_id)
-                        #asset.json = item
-                        #emitted += 1
-                        #yield asset
-                    #except self.model.DoesNotExist:
-                        #msg = 'Asset {0} exists in Vidispine but not in here'
-                        #raise ImproperlyConfigured(msg.format(vidi_ids))
-                    except Exception as exc:
-                        error = 'Error when creating DamAsset: {0}'.format(exc)
-                        raise
-
-                hits = int(result.get('hits'))
-                if self._skip:
-                    hits = hits - self._skip
-                if self._limit_met(emitted) or consumed >= hits:
-                    raise StopIteration
 
 
 ASSET_FIELD_MAPPINGS = {'filename': ('filename', '<no filename>'),
