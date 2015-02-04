@@ -2,7 +2,12 @@ import sys
 from optparse import make_option
 from datetime import datetime
 import json
+import uuid
 
+from multiprocessing import Pool
+from multiprocessing.dummy import Pool as ThreadPool
+
+from django.db import transaction
 from django.utils import timezone
 from django.core.management.base import BaseCommand
 from django.contrib.sites.models import Site
@@ -18,6 +23,56 @@ def update_progress(current, total):
     bar = '#' * complete + ' ' * (10-complete)
     sys.stdout.write(message.format(bar, progress, current, total))
     sys.stdout.flush()
+
+
+def process_single_item(asset_data, sync_uuid):
+    asset_id = asset_data.get('id')
+    asset_url = asset_data.get('url')
+    full_asset_data = get_asset(asset_url)  # TODO: SLOOOOOW
+    asset_fields = {
+        'vs_id': asset_id,
+        'raw_data': json.dumps(full_asset_data),
+        'created': timezone.now().isoformat(),
+        'username': full_asset_data.get('metadata').get('user'),
+        'sync_uuid': sync_uuid,
+    }
+
+    # Create asset
+    item, created = Asset.objects.update_or_create(vs_id=asset_id,
+                            defaults=asset_fields)
+
+    # Link to sites
+    sites = [full_asset_data.get('metadata').get('zonza_site', '')]
+    for site in sites:
+        with transaction.atomic():
+            django_site, __ = Site.objects.get_or_create(name=site, domain=site)
+            item.sites.add(django_site)
+
+    # Pull shapes out of each asset
+    shapes = get_shapes_for_asset(asset_id)
+    if hasattr(shapes, 'keys'):
+        shapes = (shapes,)
+
+    for shape_data in shapes:
+        shape_tag = shape_data.get('tag')
+        shape_url = shape_data.get('asset')
+        shape = get_shape(shape_url)
+        shape_id = shape.get('id')
+
+        shape_fields = {
+            'item': item,
+            'vs_id': shape_id,
+            'size': shape.get('size'),
+            'raw_data': json.dumps(shape),
+            'version': 0,
+            'timestamp': None,
+            'shapetag': shape_tag,
+            'sync_uuid': sync_uuid,
+        }
+
+        Shape.objects.update_or_create(vs_id=shape_id,
+                defaults=shape_fields)
+
 
 class Command(BaseCommand):
     args = ''
@@ -43,63 +98,37 @@ class Command(BaseCommand):
             delay = 0
         delay = int(delay)
         skip = int(options.get('skip') or 0)
+        sync_uuid = uuid.uuid4().hex
 
         done = 0
         print "Started at {0}".format(datetime.now().isoformat())
+        print "Sync UUID is {0}".format(sync_uuid)
         print "Syncing assets and shapes..."
 
-        # Search all assets in API
-        for asset_data, count in item_iterator():
+        try:
+            #pool = ThreadPool(10) # Sets the pool size
+            #items = item_iterator()
+            #results = pool.map(process_single_item, items)
 
-            asset_id = asset_data.get('id')
-            asset_url = asset_data.get('url')
-            full_asset_data = get_asset(asset_url)
-            asset_fields = {
-                'vs_id': asset_id,
-                'raw_data': json.dumps(full_asset_data),
-                'created': timezone.now().isoformat(),
-                'username': full_asset_data.get('user'),
-            }
+            # Search all assets in API
+            for asset_data, count in item_iterator():
 
-            # Create asset
-            item, created = Asset.objects.update_or_create(vs_id=asset_id, defaults=asset_fields)
+                process_single_item(asset_data, sync_uuid)
 
-            # Link to sites
-            sites = [full_asset_data.get('zonza_site', '')]
-            for site in sites:
-                django_site, __ = Site.objects.get_or_create(name=site, domain=site)
-                asset.sites.add(django_site)
+                # Check for assets that do not appear in API (i.e. have been deleted)
+                # Use some kind of flag in the db to delete anything not found in
+                # this run
 
-            # Pull shapes out of each asset
-            shapes = get_shapes_for_asset(asset_id)
-            if hasattr(shapes, 'keys'):
-                shapes = (shapes,)
+                # Report live progress
+                done += 1
+                update_progress(done, count)
+        finally:
+            pass
+            #pool.close()
+            #pool.join()
 
-            for shape_data in shapes:
-                shape_tag = shape_data.get('tag')
-                shape_url = shape_data.get('asset')
-                shape = get_shape(shape_url)
-                shape_id = shape.get('id')
-
-                shape_fields = {
-                    'item': item,
-                    'vs_id': shape_id,
-                    'size': shape.get('size'),
-                    'raw_data': json.dumps(shape),
-                    'version': 0,
-                    'timestamp': None,
-                    'shapetag': shape_tag
-                }
-
-                Shape.objects.update_or_create(vs_id=shape_id, defaults=shape_fields)
-
-            # Check for assets that do not appear in API (i.e. have been deleted)
-            # Use some kind of flag in the db to delete anything not found in
-            # this run
-
-            # Report live progress
-            done += 1
-            update_progress(done, count)
+        # 'Delete' any reportable models not containing current sync_guid
+        # TODO
 
         print "\n...Done!"
 
