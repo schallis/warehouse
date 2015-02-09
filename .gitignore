@@ -12,4 +12,5 @@ coverage.xml
 pylint.txt
 pep8.txt
 
+*envs
 *env_vars
