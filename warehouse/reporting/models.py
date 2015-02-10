@@ -8,7 +8,7 @@ import jsonfield
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
-from django.contrib.sites.models import Site
+from django.contrib.sites.models import _simple_domain_name_validator
 
 from dateutil import parser
 
@@ -24,6 +24,11 @@ BORK_URL = 'http://api.zonza.tv:8080/v0/'
 def GET(url, **kwargs):
     log.debug('HTTP Request to: {0}'.format(url))
     return requests.get(url, **kwargs)
+
+
+class Site(models.Model):
+    domain = models.CharField('domain name', max_length=100, unique=True,
+            validators=[_simple_domain_name_validator])
 
 
 class SyncRun(models.Model):
@@ -60,7 +65,7 @@ class Asset(ReportableModelMixin):
     filename = models.CharField(max_length=255, blank=True, null=True)
     username = models.CharField(max_length=255)
     created = models.DateTimeField()
-    sites = models.ManyToManyField('sites.Site')
+    sites = models.ManyToManyField('reporting.Site')
     raw_data = jsonfield.JSONField()
 
     def __unicode__(self):

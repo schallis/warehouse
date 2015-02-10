@@ -8,12 +8,11 @@ import uuid
 from multiprocessing import Pool
 from multiprocessing.dummy import Pool as ThreadPool
 
-from django.db import transaction
+from django.db import transaction, IntegrityError
 from django.utils import timezone
 from django.core.management.base import BaseCommand
-from django.contrib.sites.models import Site
 
-from reporting.models import (Asset, Shape, get_asset, SyncRun,
+from reporting.models import (Asset, Shape, get_asset, SyncRun, Site,
                               get_shapes_for_asset, get_shape, item_iterator)
 
 
@@ -70,9 +69,17 @@ def process_single_item(asset_data):
     # Link to sites
     sites = [full_asset_data.get('metadata').get('zonza_site', '')]
     for site in sites:
-        with transaction.atomic():
-            django_site, __ = Site.objects.get_or_create(name=site, domain=site)
-            item.sites.add(django_site)
+        # Get_or_create NOT threadsafe!!
+        try:
+            django_site = Site.objects.get(domain=site)
+        except Site.DoesNotExist:
+            try:
+                with transaction.atomic():
+                    django_site = Site.objects.create(domain=site)
+            except IntegrityError:
+                django_site = Site.objects.get(domain=site)
+
+        item.sites.add(django_site)
 
     # Pull shapes out of each asset
     shapes = get_shapes_for_asset(asset_id)

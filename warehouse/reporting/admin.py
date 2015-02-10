@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth.models import User, Group
-from django.contrib.sites.models import Site
 from django.core.urlresolvers import reverse
 from django.utils.safestring import mark_safe
 from django.db.models import Sum
@@ -56,7 +55,7 @@ class AssetAdmin(ReadOnlyAdmin):
     storage_size.short_description = 'Storage Size (GB)'
 
     def all_sites(self, obj):
-        return ", ".join([site.name for site in obj.sites.all()])
+        return ", ".join([site.domain for site in obj.sites.all()])
 
 
 class ShapeAdmin(ReadOnlyAdmin):
@@ -99,6 +98,7 @@ admin.site.register(models.Asset, AssetAdmin)
 admin.site.register(models.Shape, ShapeAdmin)
 admin.site.register(models.Download)
 admin.site.register(models.SyncRun, SyncRunAdmin)
+admin.site.register(models.Site)
 
 #admin.site.unregister(User)
 admin.site.unregister(Group)
