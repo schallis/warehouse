@@ -113,6 +113,6 @@ LOGGING = {
 }
 
 BORK_AUTH = {
-    'Bork-Token': os.environ.get('APPSETTING_BORK_TOKEN')
-    'Bork-Username': os.environ.get('APPSETTING_BORK_USERNAME')
+    'Bork-Token': os.environ.get('APPSETTING_BORK_TOKEN'),
+    'Bork-Username': os.environ.get('APPSETTING_BORK_USERNAME'),
 }
