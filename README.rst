@@ -10,6 +10,7 @@ Development
 
     mkvirtualenv warehouse
     workon warehouse
+    source envs/local
     pip install -r requirements
     ./manage.py syncdb
     ./manage.py migrate
@@ -17,6 +18,16 @@ Development
     ./manage.py runserver 0.0.0.0:8000
 
 Then fire up `localhost:8000/admin`
+
+
+Environment Variables
+~~~~~~~~~~~~~~~~~~~~~
+
+    APPSETTING_BORK_TOKEN
+    APPSETTING_BORK_USERNAME
+    APPSETTING_DB_PASSWORD
+    APPSETTING_DB_HOST
+    APPSETTING_DB_USER
 
 
 Usage
