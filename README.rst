@@ -16,7 +16,7 @@ Development
     ./manage.py sync_report_data
     ./manage.py runserver 0.0.0.0:8000
 
-Then fire up `127.0.0.1:8000/admin`
+Then fire up `localhost:8000/admin`
 
 
 Usage
@@ -30,13 +30,16 @@ The task can be also manually triggered from the webapp.
 The data it collects can then be viewed and searched in the Django admin
 interface exposed at ``/admin``.
 
-Since the sync command repeatedly polls the 3rd party source, there is a
-configurable delay which can reduce the load upon it::
-
-   SYNC_CALL_DELAY  = 1  # seconds
+NOTE: Data collection is done in parallel using multithreading (to maximise API
+concurrency)
 
 CSV Reports
 -----------
+
+NOTE: Since data collection happens iteratively, you should only report on data
+from any one sync for highest accuracy. All reportable data is linked to the
+sync it was found in so simply join and filter on that.
+
 The ``reporting`` app also comes bundled with a selection of tools to generate
 common reports. These are easy to generate from the shell::
 
@@ -57,7 +60,23 @@ callback notifications to only update items which have changed. Note that we
 need to figure out when new shapes and version are added to an item which makes
 this trickier.
 
-Results backend
-~~~~~~~~~~~~~~~
-Add a results backend for Celery to track the results of the tasks.
+API to pull data to frontend
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+CSV Export
+~~~~~~~~~~
+* By site (or all)
+* With metadata
+
+Dashboard
+~~~~~~~~~
+* Size by site (linked to CSV report)
+* Size by user (top users)
+* Size by shapetag
+* Size by mime
+* Average transcodes per asset (per site)
+* Version histogram
+* Ingests over time, per site
+* Ingests over time (by group)
+* Size over time, per site
+* Size over time (cumulative), per site
