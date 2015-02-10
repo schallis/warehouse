@@ -158,6 +158,7 @@ class Command(BaseCommand):
             pass
 
         # 'Delete' any reportable models not containing current sync_guid
+        # TODO: Change to set delete time instead of removing
         delete_not_synced(Asset, sync_run)
         delete_not_synced(Shape, sync_run)
 
