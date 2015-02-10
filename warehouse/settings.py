@@ -1,9 +1,6 @@
 import os
 import sys
 
-#import djcelery
-#djcelery.setup_loader()
-
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -22,7 +19,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'warehouse',
-        'USER': 'warehouse',
+        'USER': os.environ.get('DB_USER'),
         'PASSWORD': os.environ.get('DB_PASSWORD'),
         'HOST': os.environ.get('DB_HOST'),
         'PORT': '',
@@ -38,7 +35,9 @@ LANGUAGE_CODE = 'en-gb'
 SITE_ID = 1
 
 USE_I18N = True
-USE_L10N = True
+USE_L10N = False
+
+DATETIME_FORMAT = 'N j, Y, P (T)'
 
 MEDIA_ROOT = ''
 MEDIA_URL = ''
@@ -82,36 +81,33 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
-    #'djcelery',
     'reporting',
 )
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
-    'handlers': {},
+    'formatters':{
+        'verbose': {
+            'format': '[%(levelname)s %(threadName)s %(asctime)s %(module)s] %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+            'stream': sys.stdout
+        },
+    },
     'loggers': {
-        'django.request': {
-            'handlers': [],
-            'level': 'ERROR',
+        'reporting': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
             'propagate': True,
         },
     }
 }
-
-VIDISPINE_REPLACE_URLS = ''
-VIDISPINE_URL = 'http://dev-vidi'
-VIDISPINE_PORT = '8080'
-VIDISPINE_USERNAME = 'admin'
-VIDISPINE_PASSWORD = 'goose'
-
-CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
-
-#CELERY SETTINGS
-BROKER_HOST = "localhost"
-BROKER_PORT = 5672
-BROKER_USER = "guest"
-BROKER_PASSWORD = "guest"
-BROKER_VHOST = "/"
-
-DAM_MANAGER_CLASS = "BorkAssetQuerySet"
