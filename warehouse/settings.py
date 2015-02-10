@@ -42,7 +42,7 @@ DATETIME_FORMAT = 'N j, Y, P (T)'
 MEDIA_ROOT = ''
 MEDIA_URL = ''
 
-STATIC_ROOT = ''
+STATIC_ROOT = 'D:/home/site/wwwroot/static'
 STATIC_URL = '/static/'
 
 ADMIN_MEDIA_PREFIX = '/static/admin/'
