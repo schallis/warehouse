@@ -23,6 +23,9 @@ Then fire up `localhost:8000/admin`
 Environment Variables
 ~~~~~~~~~~~~~~~~~~~~~
 
+You'll need to set the following environment variables for this application to
+run. It is suggested that you store these in a shell script under ``envs/local``::
+
     APPSETTING_BORK_TOKEN
     APPSETTING_BORK_USERNAME
     APPSETTING_DB_PASSWORD
