@@ -41,9 +41,9 @@ def delete_not_synced(model, sync_run):
     to_delete = model.objects.exclude(sync_runs=sync_run)
     delete_count = to_delete.count()
     if delete_count:
-        msg = 'Deleting {0} {1} not found in this sync'
+        msg = 'Setting delete time for {0} {1} not found in this sync'
         log.debug(msg.format(delete_count, model))
-        to_delete.delete()
+        to_delete.update(delete_time=timezone.now())
 
 
 def process_single_item(asset_data):
