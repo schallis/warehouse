@@ -3,7 +3,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.template.context import RequestContext
 
-from reporting.tasks import SyncReportDataTask
+#from reporting.tasks import SyncReportDataTask
 
 
 def is_task_running():
