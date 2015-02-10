@@ -15,20 +15,11 @@ from dateutil import parser
 
 log = logging.getLogger(__name__)
 
-def raise_invalid():
-    warning = 'Credentials not configured. ' \
-              'Please set env variables BORK_TOKEN and BORK_USERNAME'
-    raise RuntimeError(warning)
-
 PER_PAGE = 100
 PAGE_TOKEN = '__page'
 LIMIT_TOKEN = '__page_size'
 ZONZA_SITE='trials.zonza.tv'
 BORK_URL = 'http://api.zonza.tv:8080/v0/'
-BORK_AUTH = {
-    'Bork-Token': os.environ.get('BORK_TOKEN') or raise_invalid(),
-    'Bork-Username': os.environ.get('BORK_USERNAME') or raise_invalid()
-}
 
 def GET(url, **kwargs):
     log.debug('HTTP Request to: {0}'.format(url))
@@ -120,7 +111,7 @@ class Shape(ReportableModelMixin):
 def get_asset(url):
     """Retrieve full information for specific asset"""
     headers = {'content-type': 'application/json'}
-    headers.update(BORK_AUTH)
+    headers.update(settings.BORK_AUTH)
     response = GET(url, headers=headers)
     json_response = json.loads(response.content)
     return json_response
@@ -129,7 +120,7 @@ def get_asset(url):
 def get_shapes_for_asset(asset_id):
     """Retrieve individual transcodes"""
     headers = {'content-type': 'application/json'}
-    headers.update(BORK_AUTH)
+    headers.update(settings.BORK_AUTH)
     response = GET('{}item/{}/asset'.format(BORK_URL, asset_id), headers=headers)
     json_response = json.loads(response.content)
     return json_response.get('assets')
@@ -137,7 +128,7 @@ def get_shapes_for_asset(asset_id):
 
 def get_shape(url):
     headers = {'content-type': 'application/json'}
-    headers.update(BORK_AUTH)
+    headers.update(settings.BORK_AUTH)
     response = GET('{}'.format(url), headers=headers)
     json_response = json.loads(response.content)
     return json_response

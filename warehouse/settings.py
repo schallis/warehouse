@@ -19,9 +19,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'warehouse',
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASSWORD'),
-        'HOST': os.environ.get('DB_HOST'),
+        'USER': os.environ.get('APPSETTING_DB_USER'),
+        'PASSWORD': os.environ.get('APPSETTING_DB_PASSWORD'),
+        'HOST': os.environ.get('APPSETTING_DB_HOST'),
         'PORT': '',
     }
 }
@@ -110,4 +110,9 @@ LOGGING = {
             'propagate': True,
         },
     }
+}
+
+BORK_AUTH = {
+    'Bork-Token': os.environ.get('APPSETTING_BORK_TOKEN')
+    'Bork-Username': os.environ.get('APPSETTING_BORK_USERNAME')
 }
