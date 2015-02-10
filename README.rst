@@ -67,6 +67,29 @@ common reports. These are easy to generate from the shell::
 
 TODO
 ----
+
+Dashboard
+~~~~~~~~~
+
+Add or remove columns in interface
+
+* Asset Usage report, Size by site (linked to CSV report)
+* User report, # by site (options to sort by last login, exclude disabled, exclude hogarth, test)
+* Number of users, by site
+* Expired assets (listing, with metadata)
+* Size by user (top users)
+* Size by shapetag
+* Size by mime
+* Average transcodes per asset (per site)
+* Version histogram
+* Ingests over time, per site (per day, month, year)
+* Ingests over time (by group)
+  Ingest report (filter ingest date)
+* Size over time, per site
+* Size over time (cumulative), per site
+* history of an asset
+* Who it is shared with
+
 Smarter syncing
 ~~~~~~~~~~~~~~~
 Currently, the entire index is searched each time, we may be able to utilise
@@ -76,21 +99,3 @@ this trickier.
 
 API to pull data to frontend
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-CSV Export
-~~~~~~~~~~
-* By site (or all)
-* With metadata
-
-Dashboard
-~~~~~~~~~
-* Size by site (linked to CSV report)
-* Size by user (top users)
-* Size by shapetag
-* Size by mime
-* Average transcodes per asset (per site)
-* Version histogram
-* Ingests over time, per site
-* Ingests over time (by group)
-* Size over time, per site
-* Size over time (cumulative), per site
