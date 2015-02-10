@@ -1,5 +1,6 @@
 Django==1.7.3
 #psycopg2==2.5.1
 git+https://github.com/schallis/psycopg2-windows.git@win32-py27#egg=psycopg2
-requests
-dateutils
+requests==2.5.1
+dateutils==0.6.6
+django-jsonfield==0.9.13
