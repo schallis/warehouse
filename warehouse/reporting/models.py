@@ -1,9 +1,9 @@
 import os
 import time
 import logging
-import json
 import requests
 import jsonfield
+import json
 
 from django.db import models
 from django.conf import settings
@@ -21,9 +21,28 @@ LIMIT_TOKEN = '__page_size'
 ZONZA_SITE='trials.zonza.tv'
 BORK_URL = 'http://api.zonza.tv:8080/v0/'
 
+def load_json(raw):
+    """for debugging"""
+    try:
+        return json.loads(raw)
+    except ValueError:
+        log.error('Unable to load JSON: %r' % raw)
+        raise
+
+
+def dump_json(obj):
+    try:
+        return json.dumps(obj)
+    except ValueError:
+        log.error('Unable to dump JSON: %r' % obj)
+        raise
+
 def GET(url, **kwargs):
-    log.debug('HTTP Request to: {0}'.format(url))
-    return requests.get(url, **kwargs)
+    result = requests.get(url, **kwargs)
+    log.debug('HTTP Request performed to: {0} [status: {1}]'.format(url, result.status_code))
+    if result.status_code != 200:
+        log.debug('warning status {1}'.format(result.status_code))
+    return result
 
 
 class Site(models.Model):
@@ -118,7 +137,7 @@ def get_asset(url):
     headers = {'content-type': 'application/json'}
     headers.update(settings.BORK_AUTH)
     response = GET(url, headers=headers)
-    json_response = json.loads(response.content)
+    json_response = load_json(response.content)
     return json_response
 
 
@@ -127,7 +146,7 @@ def get_shapes_for_asset(asset_id):
     headers = {'content-type': 'application/json'}
     headers.update(settings.BORK_AUTH)
     response = GET('{}item/{}/asset'.format(BORK_URL, asset_id), headers=headers)
-    json_response = json.loads(response.content)
+    json_response = load_json(response.content)
     return json_response.get('assets')
 
 
@@ -135,7 +154,7 @@ def get_shape(url):
     headers = {'content-type': 'application/json'}
     headers.update(settings.BORK_AUTH)
     response = GET('{}'.format(url), headers=headers)
-    json_response = json.loads(response.content)
+    json_response = load_json(response.content)
     return json_response
 
 
@@ -145,14 +164,12 @@ def perform_search(runas, filters = None):
         raise RuntimeError('Credentials not configured. Please set env variables BORK_TOKEN and BORK_USERNAME')
 
     log.debug('ZONZA API search request {0}'.format(filters))
-    auth = {'Bork-Token': os.environ.get('BORK_TOKEN') or raise_invalid(),
-     'Bork-Username': os.environ.get('BORK_USERNAME') or raise_invalid()}
     headers = {'content-type': 'application/json'}
-    headers.update(auth)
+    headers.update(settings.BORK_AUTH)
     params = {'zonza_site': ZONZA_SITE}
     params.update(filters or {})
     response = GET('{}item'.format(BORK_URL), params=params, headers=headers)
-    json_response = json.loads(response.content)
+    json_response = load_json(response.content)
     return json_response
 
 

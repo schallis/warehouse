@@ -1,7 +1,6 @@
 import sys
 from optparse import make_option
 from datetime import datetime
-import json
 import logging
 import uuid
 
@@ -12,19 +11,11 @@ from django.db import transaction, IntegrityError
 from django.utils import timezone
 from django.core.management.base import BaseCommand
 
-from reporting.models import (Asset, Shape, get_asset, SyncRun, Site,
+from reporting.models import (Asset, Shape, get_asset, SyncRun, Site, dump_json,
                               get_shapes_for_asset, get_shape, item_iterator)
 
 
 log = logging.getLogger(__name__)
-
-
-def get_json(obj):
-    try:
-        return json.dumps(obj)
-    except ValueError:
-        log.error('Unable to parse JSON: %r' % obj)
-        raise
 
 
 def update_progress(current, total):
@@ -37,6 +28,7 @@ def update_progress(current, total):
 
 
 def delete_not_synced(model, sync_run):
+    # TODO: Do something else with anything that raised an exception
     to_delete = model.objects.exclude(sync_runs=sync_run)
     delete_count = to_delete.count()
     if delete_count:
@@ -53,7 +45,7 @@ def process_single_item(asset_data):
         full_asset_data = get_asset(asset_url)  # TODO: SLOOOW, get from 1st call
         asset_fields = {
             'vs_id': asset_id,
-            'raw_data': get_json(full_asset_data),
+            'raw_data': dump_json(full_asset_data),
             'created': timezone.now().isoformat(),
             'username': full_asset_data.get('metadata').get('user'),
         }
@@ -96,7 +88,7 @@ def process_single_item(asset_data):
             'item': item,
             'vs_id': shape_id,
             'size': shape.get('size'),
-            'raw_data': get_json(shape),
+            'raw_data': dump_json(shape),
             'version': 0,
             'timestamp': None,
             'shapetag': shape_tag,
@@ -143,7 +135,7 @@ class Command(BaseCommand):
         try:
             pool = ThreadPool(10) # Sets the pool size
             items = item_iterator()
-            results = pool.map(process_single_item, items, 10)
+            results = pool.map(process_single_item, items, 2)
 
             # Search all assets in API
             #for asset_data, count in item_iterator():
