@@ -24,7 +24,7 @@ class ReadOnlyAdmin(admin.ModelAdmin):
 
 class ShapeInline(admin.TabularInline):
     model = models.Shape
-    fields = ('link', 'shapetag', 'size', 'sync_uuid')
+    fields = ('link', 'shapetag', 'size')
     readonly_fields = ('link', 'shapetag', 'size')
     extra = 0
 
@@ -36,12 +36,22 @@ class ShapeInline(admin.TabularInline):
 class AssetAdmin(ReadOnlyAdmin):
     actions = None
     inlines = ShapeInline,
+    fields = ('vs_id', 'username', 'filename', 'all_sites', 'created', 'deleted',
+            'raw_data', 'last_synced', 'sync_runs_count',
+            'latest_sync', 'id')
     list_display = ('vs_id', 'username', 'all_sites', 'storage_size',
-            'sync_uuid')
+            'latest_sync')
 
-    def storage_size(self, asd):
-        total_bytes = asd.shape_set.aggregate(Sum('size'))['size__sum'] or 0
-        return '{:.2}'.format(float(total_bytes)/1000**3)
+    def latest_sync(self, obj):
+        ordered = obj.sync_runs.order_by('-start_time')
+        return ordered.count() and ordered[0] or 'None'
+
+    def sync_runs_count(self, obj):
+        return obj.sync_runs.count()
+
+    def storage_size(self, obj):
+        total_bytes = obj.shape_set.aggregate(Sum('size'))['size__sum'] or 0
+        return '{:.2f}'.format(float(total_bytes)/1000**3)
 
     storage_size.short_description = 'Storage Size (GB)'
 
@@ -50,14 +60,45 @@ class AssetAdmin(ReadOnlyAdmin):
 
 
 class ShapeAdmin(ReadOnlyAdmin):
-    list_display = ('vs_id', 'shapetag', 'size', 'version', 'item')
+    fields = ('vs_id', 'deleted', 'timestamp',
+            'last_synced', 'sync_runs_count', 'item',
+            'version', 'raw_data', 'shapetag', 'size')
+    list_display = ('vs_id', 'shapetag', 'size', 'version', 'item',
+            'latest_sync')
     actions = None
 
+    def sync_runs_count(self, obj):
+        return obj.sync_runs.count()
+
+    def latest_sync(self, obj):
+        return '{0}'.format(obj.sync_runs.order_by('-start_time')[0])
+
+
+class AssetInline(admin.TabularInline):
+    model = models.Asset
+    fields = ('vs_id', 'username', 'sites')
+    readonly_fields = ('vs_id', 'username', 'sites')
+    extra = 0
+
+    def link(self, instance):
+        url = reverse("admin:reporting_asset_change", args = (instance.id,))
+        return mark_safe("<a href='%s'>%s</a>" % (url, instance.vs_id))
+
+
+class SyncRunAdmin(ReadOnlyAdmin):
+    list_display = ('sync_uuid', 'start_time', 'end_time', 'completed',
+            'remaining')
+    actions = None
+    #inlines = AssetInline,
+
+    def remaining(self, obj):
+        return obj.asset_set.count()
 
 
 admin.site.register(models.Asset, AssetAdmin)
 admin.site.register(models.Shape, ShapeAdmin)
 admin.site.register(models.Download)
+admin.site.register(models.SyncRun, SyncRunAdmin)
 
 admin.site.unregister(User)
 admin.site.unregister(Group)

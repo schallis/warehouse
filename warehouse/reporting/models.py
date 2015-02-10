@@ -23,7 +23,7 @@ def raise_invalid():
 PER_PAGE = 100
 PAGE_TOKEN = '__page'
 LIMIT_TOKEN = '__page_size'
-ZONZA_SITE='zonzacompany.zonza.tv'
+ZONZA_SITE='trials.zonza.tv'
 BORK_URL = 'http://api.zonza.tv:8080/v0/'
 BORK_AUTH = {
     'Bork-Token': os.environ.get('BORK_TOKEN') or raise_invalid(),
@@ -31,8 +31,19 @@ BORK_AUTH = {
 }
 
 def GET(url, **kwargs):
-    log.debug('HTTP Request to: ', url)
+    log.debug('HTTP Request to: {0}'.format(url))
     return requests.get(url, **kwargs)
+
+
+class SyncRun(models.Model):
+    """Track each sync"""
+    start_time = models.DateTimeField(auto_now=True)
+    end_time = models.DateTimeField(blank=True, null=True)
+    sync_uuid = models.CharField(max_length=32)
+    completed = models.BooleanField(default=False)
+
+    def __unicode__(self):
+        return self.sync_uuid
 
 
 class DamAssetManager(models.Manager):
@@ -43,7 +54,7 @@ class DamAssetManager(models.Manager):
 
 class ReportableModelMixin(models.Model):
     last_synced = models.DateTimeField(auto_now=True)
-    sync_uuid = models.CharField(max_length=32)
+    sync_runs = models.ManyToManyField('reporting.SyncRun')
 
     class Meta:
         abstract = True
@@ -137,7 +148,7 @@ def perform_search(runas, filters = None):
     def raise_invalid():
         raise RuntimeError('Credentials not configured. Please set env variables BORK_TOKEN and BORK_USERNAME')
 
-    log.debug('ZONZA API search request {}', filters)
+    log.debug('ZONZA API search request {0}'.format(filters))
     auth = {'Bork-Token': os.environ.get('BORK_TOKEN') or raise_invalid(),
      'Bork-Username': os.environ.get('BORK_USERNAME') or raise_invalid()}
     headers = {'content-type': 'application/json'}
@@ -268,7 +279,8 @@ def item_iterator():
                 vidi_ids = [{'id': item_id}]
                 try:
                     emitted += 1
-                    yield (item, count)
+                    #yield (item, count)  # single-threaded
+                    yield item
                 except Exception as exc:
                     error = 'Error when creating DamAsset: {0}'.format(exc)
                     raise
