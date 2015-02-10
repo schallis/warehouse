@@ -100,6 +100,6 @@ admin.site.register(models.Shape, ShapeAdmin)
 admin.site.register(models.Download)
 admin.site.register(models.SyncRun, SyncRunAdmin)
 
-admin.site.unregister(User)
+#admin.site.unregister(User)
 admin.site.unregister(Group)
-admin.site.unregister(Site)
+#admin.site.unregister(Site)
