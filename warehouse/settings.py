@@ -43,7 +43,9 @@ MEDIA_ROOT = ''
 MEDIA_URL = ''
 
 STATIC_ROOT = 'D:/home/site/wwwroot/static'
-STATIC_URL = '/static/'
+# STATIC_URL = '/static/'
+STATIC_URL = 'https://portalvhds52l58tfthh6wl.blob.core.windows.net/staticfiles/'
+STATICFILES_STORAGE = 'azure_storage.storage.AzureStorage'
 
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
@@ -53,6 +55,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
+
 
 SECRET_KEY = '((@b3f+s!o8^r$wb$p8@+&8k@&y*3o7sy3dp4xk+45=$e2996x'
 
@@ -115,4 +118,13 @@ LOGGING = {
 BORK_AUTH = {
     'Bork-Token': os.environ.get('APPSETTING_BORK_TOKEN'),
     'Bork-Username': os.environ.get('APPSETTING_BORK_USERNAME'),
+}
+
+AZURE_STORAGE = {
+    'ACCOUNT_NAME': os.environ.get('APPSETTING_STORAGE_ACCOUNT_NAME'),
+    'ACCOUNT_KEY': os.environ.get('APPSETTING_STORAGE_ACCOUNT_KEY'),
+    'CONTAINER': 'staticfiles',
+    'STATIC_CONTAINER': 'static',
+    'CDN_HOST': None,
+    'USE_SSL': False,
 }
