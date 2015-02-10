@@ -1,6 +1,5 @@
 Django==1.7.3
-psycopg2==2.5.1
-South==0.8.1
-django-celery==3.0.17
+#psycopg2==2.5.1
+git+https://github.com/nwcell/psycopg2-windows.git@win32-py27#egg=psycopg2
 requests
 dateutils
