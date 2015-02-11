@@ -3,10 +3,9 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.template.context import RequestContext
 from django.db.models import Count, Sum, Max
+from django.contrib import admin
 
 from reporting.models import Asset, SyncRun, Site
-
-#from reporting.tasks import SyncReportDataTask
 
 
 def is_task_running():
@@ -39,6 +38,7 @@ def dashboard(request):
             .annotate(count=Count('asset')).order_by('-count')[:20]
 
     params = {
+        'site_header': admin.site.site_header,
         'last_sync': last_sync,
         'last_syncs': sync_runs[:5],
         'is_running': is_task_running(),
