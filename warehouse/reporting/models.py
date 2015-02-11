@@ -177,15 +177,16 @@ def get_offsets(emitted, skip, precache):
     return (asset, page)
 
 
-def asset_iterator(zonza_site):
+def asset_iterator(zonza_site, skip):
     count = 0
     consumed = 0
     emitted = 0
     existing = 0
     msg = 'Synced {0}/{1} ({2} already existed)'
-    skip = 0
+    skip = skip or 0
     sync_message = lambda : msg.format(emitted, skip, count, existing)
     per_page = PER_PAGE
+    assets_skipped = skip/per_page * per_page
     filters = {
         'zonza_site': zonza_site,
         LIMIT_TOKEN: per_page,
@@ -206,7 +207,7 @@ def asset_iterator(zonza_site):
             raise StopIteration
         delay = int(getattr(settings, 'SYNC_CALL_DELAY', 0))
         time.sleep(delay)
-        count = int(result.get('hits'))
+        count = int(result.get('hits')) - skip
         for num, asset in enumerate(result.get('item')):
             consumed += 1
             if num >= asset_offset:
@@ -222,6 +223,6 @@ def asset_iterator(zonza_site):
 
             hits = int(result.get('hits'))
             if skip:
-                hits = hits - skip
+                hits = hits - assets_skipped
             if consumed >= hits:
                 raise StopIteration

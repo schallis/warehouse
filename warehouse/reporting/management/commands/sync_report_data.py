@@ -137,6 +137,11 @@ class Command(BaseCommand):
             '--skip',
             dest='skip',
             help='Skip this number of assets'),
+        make_option(
+            '-z',
+            '--zonza',
+            dest='zonza_site',
+            help='Which zonza_site to sync/filter by'),
     )
 
     def handle(self, *args, **options):
@@ -148,7 +153,7 @@ class Command(BaseCommand):
         sync_uuid = uuid.uuid4().hex
         global sync_run
         ZONZA_SITES = ['trials', '230pas', 'zonzacompany']
-        zonza_site = '230pas.zonza.tv'
+        zonza_site = delay = options.get('zonza_site') or '230pas.zonza.tv'
         current_site, created = Site.objects.get_or_create(domain=zonza_site)
         sync_run = SyncRun.objects.create(sync_uuid=sync_uuid, site=current_site)
 
@@ -159,7 +164,7 @@ class Command(BaseCommand):
 
         try:
             pool = ThreadPool(10) # Sets the pool size
-            assets = asset_iterator(zonza_site)
+            assets = asset_iterator(zonza_site, skip)
             #results = pool.map(process_single_asset, assets, 2)
 
             # Search all assets in API
