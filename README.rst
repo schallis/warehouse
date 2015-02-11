@@ -89,6 +89,7 @@ Add or remove columns in interface
 * Size over time (cumulative), per site
 * history of an asset
 * Who it is shared with
+* Biggest assets per site
 
 Smarter syncing
 ~~~~~~~~~~~~~~~
