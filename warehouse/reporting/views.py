@@ -30,10 +30,16 @@ def dashboard(request):
         last_sync = None
 
     all_sites = Site.objects.all()
-    num_assets_by_site = all_sites.values('domain') \
-            .annotate(count=Count('asset')).order_by('-count')
+    #num_assets_by_site = all_sites.values('domain') \
+            #.annotate(count=Count('asset')).order_by('-count')
+    #num_uploaders_by_site = all_sites.values('domain') \
+            #.annotate(uploaders=Count('asset__username', distinct=True))
     size_by_site = all_sites.values('domain') \
-            .annotate(size=Sum('asset__shape__size')).annotate(count=Count('asset')).order_by('-size')
+            .annotate(
+                size=Sum('asset__shape__size'),
+                count=Count('asset', distinct=True),
+                uploaders=Count('asset__username', distinct=True)) \
+            .order_by('-size')
     top_uploaders = all_sites.values('domain', 'asset__username') \
             .annotate(count=Count('asset')).order_by('-count')[:20]
 
@@ -42,9 +48,10 @@ def dashboard(request):
         'last_sync': last_sync,
         'last_syncs': sync_runs[:5],
         'is_running': is_task_running(),
-        'num_assets_by_site': num_assets_by_site,
+        #'num_assets_by_site': num_assets_by_site,
         'size_by_site': size_by_site,
         'top_uploaders': top_uploaders,
+        #'num_uploaders_by_site': num_uploaders_by_site,
     }
 
     return render(request,

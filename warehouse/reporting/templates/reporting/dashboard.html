@@ -22,36 +22,54 @@
     </table>
     <br/>
 
-    <h1># of assets per site</h1>
-    <table>
-        <tr>
-            <th>Domain</th>
-            <th>Assets</th>
-        </tr>
-    {% for site in num_assets_by_site %}
-    <tr>
-        <td>{{site.domain}}</td>
-        <td>{{site.count}}</td>
-    </tr>
-    {% endfor %}
-    </table>
-    <br/>
+    <!--<h1># of assets per site</h1>-->
+    <!--<table>-->
+        <!--<tr>-->
+            <!--<th>Domain</th>-->
+            <!--<th>Assets</th>-->
+        <!--</tr>-->
+    <!--{% for site in num_assets_by_site %}-->
+    <!--<tr>-->
+        <!--<td>{{site.domain}}</td>-->
+        <!--<td>{{site.count}}</td>-->
+    <!--</tr>-->
+    <!--{% endfor %}-->
+    <!--</table>-->
+    <!--<br/>-->
 
     <h1>Total usage per site</h1>
     <table>
         <tr>
             <th>Domain</th>
-            <th>Usage</th>
+            <th>Total Size</th>
+            <th>Assets</th>
+            <th>Uploaders</th>
         </tr>
     {% for site in size_by_site %}
     <tr>
         <td>{{site.domain}}</td>
         <td>{{site.size|filesizeformat}}</td>
         <td>{{site.count}}</td>
+        <td>{{site.uploaders}}</td>
     </tr>
     {% endfor %}
     </table>
     <br/>
+
+    <!--<h1># uploaders per site</h1>-->
+    <!--<table>-->
+        <!--<tr>-->
+            <!--<th>Domain</th>-->
+            <!--<th>Uploaders</th>-->
+        <!--</tr>-->
+    <!--{% for site in num_uploaders_by_site %}-->
+    <!--<tr>-->
+        <!--<td>{{site.domain}}</td>-->
+        <!--<td>{{site.uploaders}}</td>-->
+    <!--</tr>-->
+    <!--{% endfor %}-->
+    <!--</table>-->
+    <!--<br/>-->
 
     <h1>Top uploaders</h1>
     {{ uploader_by_site}}
