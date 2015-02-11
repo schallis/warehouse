@@ -115,6 +115,7 @@ LOGGING = {
     }
 }
 
+BORK_URL = 'http://api.zonza.tv:8080/v0/'
 BORK_AUTH = {
     'Bork-Token': os.environ.get('APPSETTING_BORK_TOKEN'),
     'Bork-Username': os.environ.get('APPSETTING_BORK_USERNAME'),

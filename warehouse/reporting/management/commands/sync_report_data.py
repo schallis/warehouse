@@ -12,8 +12,10 @@ from django.utils import timezone
 from django.core.management.base import BaseCommand
 
 from reporting.models import (Asset, Shape, get_asset, SyncRun, Site, dump_json,
-                              get_shapes_for_asset, get_shape, item_iterator)
+                              get_shapes_for_asset, get_shape, asset_iterator)
 
+from threading import Lock
+import time
 
 log = logging.getLogger(__name__)
 
@@ -28,35 +30,54 @@ def update_progress(current, total):
 
 
 def delete_not_synced(model, sync_run):
-    # TODO: Do something else with anything that raised an exception
-    to_delete = model.objects.exclude(sync_runs=sync_run)
+    """Set delete time of any assets/shapes not found in this sync
+
+    (but were found in a previous one *for the same site*)
+
+    Exclude: model.sites or model.asset.sites != sync_run.site
+    """
+    not_found = model.objects.exclude(last_sync=sync_run)
+    if hasattr(model, 'sites'):  # Asset
+        to_delete = not_found.filter(sites=sync_run.site)
+    elif hasattr(model, 'asset'):  # Shape
+        to_delete = not_found.filter(asset__sites=sync_run.site)
+    else:
+        raise Exception('Wierdness deleting invalid model')
+
     delete_count = to_delete.count()
     if delete_count:
         msg = 'Setting delete time for {0} {1} not found in this sync'
         log.debug(msg.format(delete_count, model))
-        to_delete.update(delete_time=timezone.now())
+        to_delete.update(deleted=timezone.now())
+    else:
+        msg = '{} items not found but none missing for current sync site'
+        log.debug(msg.format(not_found.count()))
 
 
-def process_single_item(asset_data):
+def process_single_asset(asset_data):
     try:
         asset_id = asset_data.get('id')
-        log.debug('Processing item {0}'.format(asset_id))
         asset_url = asset_data.get('url')
         full_asset_data = get_asset(asset_url)  # TODO: SLOOOW, get from 1st call
-        asset_fields = {
-            'vs_id': asset_id,
-            'raw_data': dump_json(full_asset_data),
-            'created': timezone.now().isoformat(),
-            'username': full_asset_data.get('metadata').get('user'),
-        }
+        username = full_asset_data.get('metadata').get('user')
+        raw_data = dump_json(full_asset_data)
+        log.debug('Processing asset {0}'.format(asset_id))
     except AttributeError:
-        log.error('Odd looking asset received: %r' % asset_data)
+        log.error('Odd looking asset received: {0}'.format(asset_data))
         raise
 
+    asset_fields = {
+        'vs_id': asset_id,
+        'raw_data': raw_data,
+        'created': timezone.now().isoformat(),
+        'deleted': None,  # In case assets were undeleted
+        'username': username,
+        'last_sync': sync_run,
+    }
+
     # Create asset
-    item, created = Asset.objects.update_or_create(vs_id=asset_id,
+    asset, created = Asset.objects.update_or_create(vs_id=asset_id,
                             defaults=asset_fields)
-    item.sync_runs.add(sync_run)
 
     # Link to sites
     sites = [full_asset_data.get('metadata').get('zonza_site', '')]
@@ -71,7 +92,7 @@ def process_single_item(asset_data):
             except IntegrityError:
                 django_site = Site.objects.get(domain=site)
 
-        item.sites.add(django_site)
+        asset.sites.add(django_site)
 
     # Pull shapes out of each asset
     shapes = get_shapes_for_asset(asset_id)
@@ -85,18 +106,19 @@ def process_single_item(asset_data):
         shape_id = shape.get('id')
 
         shape_fields = {
-            'item': item,
+            'asset': asset,
             'vs_id': shape_id,
             'size': shape.get('size'),
             'raw_data': dump_json(shape),
             'version': 0,
             'timestamp': None,
             'shapetag': shape_tag,
+            'last_sync': sync_run,
+            'deleted': None,  # In case shape was undeleted
         }
 
         shape, created = Shape.objects.update_or_create(vs_id=shape_id,
                 defaults=shape_fields)
-        shape.sync_runs.add(sync_run)
 
 
 class Command(BaseCommand):
@@ -114,7 +136,7 @@ class Command(BaseCommand):
             '-s',
             '--skip',
             dest='skip',
-            help='Skip this number of items'),
+            help='Skip this number of assets'),
     )
 
     def handle(self, *args, **options):
@@ -125,7 +147,10 @@ class Command(BaseCommand):
         skip = int(options.get('skip') or 0)
         sync_uuid = uuid.uuid4().hex
         global sync_run
-        sync_run = SyncRun.objects.create(sync_uuid=sync_uuid)  # Nasty
+        ZONZA_SITES = ['trials', '230pas', 'zonzacompany']
+        zonza_site = '230pas.zonza.tv'
+        current_site, created = Site.objects.get_or_create(domain=zonza_site)
+        sync_run = SyncRun.objects.create(sync_uuid=sync_uuid, site=current_site)
 
         done = 0
         print "Started at {0}".format(timezone.now().isoformat())
@@ -134,30 +159,29 @@ class Command(BaseCommand):
 
         try:
             pool = ThreadPool(10) # Sets the pool size
-            items = item_iterator()
-            results = pool.map(process_single_item, items, 2)
+            assets = asset_iterator(zonza_site)
+            #results = pool.map(process_single_asset, assets, 2)
 
             # Search all assets in API
-            #for asset_data, count in item_iterator():
+            for asset_data, count in assets:
 
-                #process_single_item(asset_data, sync_uuid)
+                process_single_asset(asset_data)
 
                 ## Check for assets that do not appear in API (i.e. have been deleted)
                 ## Use some kind of flag in the db to delete anything not found in
                 ## this run
 
                 ## Report live progress
-                #done += 1
-                #update_progress(done, count)
+                done += 1
+                update_progress(done, count)
         finally:
-            pool.close()
-            pool.join()
+            #pool.close()
+            #pool.join()
             sync_run.end_time=timezone.now()
             sync_run.save()
             pass
 
         # 'Delete' any reportable models not containing current sync_guid
-        # TODO: Change to set delete time instead of removing
         delete_not_synced(Asset, sync_run)
         delete_not_synced(Shape, sync_run)
 

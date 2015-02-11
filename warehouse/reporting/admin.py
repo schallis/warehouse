@@ -36,17 +36,9 @@ class AssetAdmin(ReadOnlyAdmin):
     actions = None
     inlines = ShapeInline,
     fields = ('vs_id', 'username', 'filename', 'all_sites', 'created', 'deleted',
-            'raw_data', 'last_synced', 'sync_runs_count',
-            'latest_sync', 'id')
+            'raw_data', 'last_synced', 'last_sync', 'id')
     list_display = ('vs_id', 'username', 'all_sites', 'storage_size',
-            'latest_sync')
-
-    def latest_sync(self, obj):
-        ordered = obj.sync_runs.order_by('-start_time')
-        return ordered.count() and ordered[0] or 'None'
-
-    def sync_runs_count(self, obj):
-        return obj.sync_runs.count()
+            'last_sync')
 
     def storage_size(self, obj):
         total_bytes = obj.shape_set.aggregate(Sum('size'))['size__sum'] or 0
@@ -59,18 +51,11 @@ class AssetAdmin(ReadOnlyAdmin):
 
 
 class ShapeAdmin(ReadOnlyAdmin):
-    fields = ('vs_id', 'deleted', 'timestamp',
-            'last_synced', 'sync_runs_count', 'item',
-            'version', 'raw_data', 'shapetag', 'size')
-    list_display = ('vs_id', 'shapetag', 'size', 'version', 'item',
-            'latest_sync')
+    fields = ('vs_id', 'deleted', 'timestamp', 'last_synced', 'last_sync',
+            'asset', 'version', 'raw_data', 'shapetag', 'size')
+    list_display = ('vs_id', 'shapetag', 'size', 'version', 'asset',
+            'last_sync')
     actions = None
-
-    def sync_runs_count(self, obj):
-        return obj.sync_runs.count()
-
-    def latest_sync(self, obj):
-        return '{0}'.format(obj.sync_runs.order_by('-start_time')[0])
 
 
 class AssetInline(admin.TabularInline):

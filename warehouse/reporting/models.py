@@ -5,6 +5,8 @@ import requests
 import jsonfield
 import json
 
+from retrying import retry
+
 from django.db import models
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
@@ -18,8 +20,6 @@ log = logging.getLogger(__name__)
 PER_PAGE = 100
 PAGE_TOKEN = '__page'
 LIMIT_TOKEN = '__page_size'
-ZONZA_SITE='trials.zonza.tv'
-BORK_URL = 'http://api.zonza.tv:8080/v0/'
 
 def load_json(raw):
     """for debugging"""
@@ -37,17 +37,29 @@ def dump_json(obj):
         log.error('Unable to dump JSON: %r' % obj)
         raise
 
+
+@retry(stop_max_attempt_number=3, wait_exponential_multiplier=1000, wait_exponential_max=10000)
 def GET(url, **kwargs):
     result = requests.get(url, **kwargs)
     log.debug('HTTP Request performed to: {0} [status: {1}]'.format(url, result.status_code))
-    if result.status_code != 200:
-        log.debug('warning status {1}'.format(result.status_code))
+    if int(result.status_code) == 500:
+        log.debug('warning status {0}'.format(result.status_code))
+        raise Exception('Unable to retrieve data')
     return result
 
 
 class Site(models.Model):
     domain = models.CharField('domain name', max_length=100, unique=True,
             validators=[_simple_domain_name_validator])
+
+    # Sales person?
+    # Account person?
+    # Company?
+    # Contract terms?
+
+    def __unicode__(self):
+        return self.domain
+
 
 
 class SyncRun(models.Model):
@@ -56,6 +68,7 @@ class SyncRun(models.Model):
     end_time = models.DateTimeField(blank=True, null=True)
     sync_uuid = models.CharField(max_length=32)
     completed = models.BooleanField(default=False)
+    site = models.ForeignKey('reporting.Site')
 
     def __unicode__(self):
         return self.sync_uuid
@@ -69,7 +82,7 @@ class DamAssetManager(models.Manager):
 
 class ReportableModelMixin(models.Model):
     last_synced = models.DateTimeField(auto_now=True)
-    sync_runs = models.ManyToManyField('reporting.SyncRun')
+    last_sync = models.ForeignKey('reporting.SyncRun')
 
     class Meta:
         abstract = True
@@ -97,18 +110,6 @@ class Asset(ReportableModelMixin):
             self.save()
 
 
-METADATA_MAPPING = (
-    ('title', 'StandardMetadata.title'),
-    ('broadcast_ready', 'StandardMetadata.broadcast_ready'),
-)
-
-
-class StandardMetadata(ReportableModelMixin):
-    """A record of standardized metadata on an asset"""
-    item = models.ForeignKey('reporting.Asset')
-
-
-
 class Download(ReportableModelMixin):
     """A record of each shape download"""
     item = models.ForeignKey('reporting.Asset')
@@ -120,7 +121,7 @@ class Download(ReportableModelMixin):
 class Shape(ReportableModelMixin):
     """A record of a Vidispine shape"""
     deleted = models.DateTimeField(blank=True, null=True)
-    item = models.ForeignKey('reporting.Asset')
+    asset = models.ForeignKey('reporting.Asset')
     vs_id = models.CharField(max_length=10, unique=True)
     shapetag = models.CharField(max_length=255)
     timestamp = models.DateTimeField(blank=True, null=True)
@@ -145,7 +146,7 @@ def get_shapes_for_asset(asset_id):
     """Retrieve individual transcodes"""
     headers = {'content-type': 'application/json'}
     headers.update(settings.BORK_AUTH)
-    response = GET('{}item/{}/asset'.format(BORK_URL, asset_id), headers=headers)
+    response = GET('{}item/{}/asset'.format(settings.BORK_URL, asset_id), headers=headers)
     json_response = load_json(response.content)
     return json_response.get('assets')
 
@@ -159,16 +160,11 @@ def get_shape(url):
 
 
 def perform_search(runas, filters = None):
-    """Query Vidispine for items"""
-    def raise_invalid():
-        raise RuntimeError('Credentials not configured. Please set env variables BORK_TOKEN and BORK_USERNAME')
-
+    """Query Vidispine for assets"""
     log.debug('ZONZA API search request {0}'.format(filters))
     headers = {'content-type': 'application/json'}
     headers.update(settings.BORK_AUTH)
-    params = {'zonza_site': ZONZA_SITE}
-    params.update(filters or {})
-    response = GET('{}item'.format(BORK_URL), params=params, headers=headers)
+    response = GET('{}item'.format(settings.BORK_URL), params=filters, headers=headers)
     json_response = load_json(response.content)
     return json_response
 
@@ -176,90 +172,12 @@ def perform_search(runas, filters = None):
 def get_offsets(emitted, skip, precache):
     """Compute vidispine search offsets from our iterator state"""
     start_at = skip + emitted
-    item = start_at % precache
+    asset = start_at % precache
     page = start_at / precache + 1
-    return (item, page)
+    return (asset, page)
 
 
-def retrieve_field_from_vidispine(field, model):
-    """ Decide if we can and should sync this field
-
-    :param field:
-        A string denoting the field name
-    :param model:
-        The Asset model class
-
-    :returns: :type:`!Boolean`
-    """
-    if field == 'id' or field.startswith('_'):
-        return False
-    if field not in model._meta.get_all_field_names():
-        return False
-    return True
-
-
-def update_asset_metadata_from_vidispine(asset, item):
-    """Populate the metadata fields defined on the asset with data
-    from the corresponding fields in the Vidispine item
-
-    :param asset:
-        The Fido asset instance
-    :param item:
-    """
-    for field, values in item.metadata.items():
-        if retrieve_field_from_vidispine(field, asset):
-            value = values[0]
-            setattr(asset, field, value)
-
-    asset._mirror_on_vidispine = False
-    asset.save()
-
-
-class AdvancedSearch(object):
-    """Represent an advanced search query using Django style querying """
-
-    def __init__(self, operator, *args, **kwargs):
-        """"
-        :param operator:
-            Either 'AND' or 'OR' describing how to combine the restrictions
-        :param **kwargs:
-            Field/value combinations to restrict the search to
-        """
-        if operator not in ('AND', 'OR'):
-            raise TypeError('Operator must be AND or OR')
-        if args:
-            raise TypeError('All fields must be specified as kwargs')
-        self._dict = {'advanced_search': {'operator': operator,
-                             'fields': Fields(**kwargs).serialise()}}
-
-    def serialise(self):
-        """Compile the search into a form understandable by Vidispine
-
-        :returns:
-            A dictionary that can be passed directly into Vidispine as JSON
-        """
-        return self._dict
-
-
-class Fields(object):
-    """Represents a Vidispine field search dict"""
-
-    def __init__(self, *args, **kwargs):
-        self._set = []
-        for key, value in sorted(kwargs.items()):
-            self._set.append({'name': key,
-             'value': value})
-
-    def serialise(self):
-        """Compile the search into a form understandable by Vidispine
-
-        :returns:
-            A list that can be passed into an advanced search dictionary
-        """
-        return self._set
-
-
-def item_iterator():
+def asset_iterator(zonza_site):
     count = 0
     consumed = 0
     emitted = 0
@@ -268,10 +186,14 @@ def item_iterator():
     skip = 0
     sync_message = lambda : msg.format(emitted, skip, count, existing)
     per_page = PER_PAGE
-    filters = {LIMIT_TOKEN: per_page, PAGE_TOKEN: 1}
+    filters = {
+        'zonza_site': zonza_site,
+        LIMIT_TOKEN: per_page,
+        PAGE_TOKEN: 1
+    }
 
     while True:
-        item_offset, page = get_offsets(emitted, skip, per_page)
+        asset_offset, page = get_offsets(emitted, skip, per_page)
         filters[PAGE_TOKEN] = page
         try:
             filters = filters
@@ -285,15 +207,15 @@ def item_iterator():
         delay = int(getattr(settings, 'SYNC_CALL_DELAY', 0))
         time.sleep(delay)
         count = int(result.get('hits'))
-        for num, item in enumerate(result.get('item')):
+        for num, asset in enumerate(result.get('item')):
             consumed += 1
-            if num >= item_offset:
-                item_id = item['id']
-                vidi_ids = [{'id': item_id}]
+            if num >= asset_offset:
+                asset_id = asset['id']
+                vidi_ids = [{'id': asset_id}]
                 try:
                     emitted += 1
-                    #yield (item, count)  # single-threaded
-                    yield item
+                    yield (asset, count)  # single-threaded
+                    #yield asset
                 except Exception as exc:
                     error = 'Error when creating DamAsset: {0}'.format(exc)
                     raise
@@ -303,89 +225,3 @@ def item_iterator():
                 hits = hits - skip
             if consumed >= hits:
                 raise StopIteration
-
-
-ASSET_FIELD_MAPPINGS = {'filename': ('filename', '<no filename>'),
- 'size': ('size', '0'),
- 'username': ('user', '<no username>')}
-ASSET_FIELD_MAPPINGS_EXCEPTIONS = ['deleted',
- 'last_synced',
- 'vs_id',
- 'sites',
- 'id',
- 'raw_metadata']
-DATA_TRANSFORMATIONS = [(models.fields.DateTimeField, parser.parse), (models.fields.IntegerField, int)]
-
-def create_sites_for_item(asset, item):
-    sites = [item.get('metadata').get('zonza_site', '')]
-    for site in sites:
-        django_site, __ = Site.objects.get_or_create(name=site, domain=site)
-        asset.sites.add(django_site)
-
-
-def mapped_field(field, item):
-    """Take a django asset field name and return mapped data from the
-    Vidispine item
-    """
-    fallback = (field, '<no value>')
-    attribute, default = ASSET_FIELD_MAPPINGS.get(field) or fallback
-    try:
-        value = item.get(attribute, default)
-        if not value:
-            if attribute == 'created':
-                shapes = item.get('shapes')
-                return shapes[0].container_file()['timestamp']
-            return default
-    except KeyError as exc:
-        log.warning('Error in mapped_field with arguments (%s, %s)' % (field, item))
-
-    return value
-
-
-def get_metadata_from_vidispine(asset_model, item):
-    """Return a dictionary of values for each field on the asset
-    containing the equivalent values from the Vidispine item
-    """
-    metadata = {}
-    exceptions = ASSET_FIELD_MAPPINGS_EXCEPTIONS
-    all_fields = asset_model._meta.get_all_field_names()
-    for field in [ f for f in all_fields if f not in exceptions ]:
-        raw_value = mapped_field(field, item.get('metadata'))
-        try:
-            field_model = asset_model._meta.get_field(field)
-        except models.fields.FieldDoesNotExist:
-            continue
-
-        if field_model.empty_strings_allowed and not raw_value:
-            msg = 'No data for required field {0}'.format(field)
-            raise ImproperlyConfigured(msg)
-        value = raw_value
-        for field_type, function in DATA_TRANSFORMATIONS:
-            if isinstance(field_model, field_type):
-                try:
-                    value = function(raw_value)
-                except Exception:
-                    log.warning('Data not conformant and default not good enough')
-
-                break
-
-        metadata[field] = value
-
-    return metadata
-
-
-def create_shapes_from_vidispine(asset, item):
-    item_id = item.get('id')
-    item_shapes = get_item_assets(item_id).get('assets')
-    # check for only single shape
-    if hasattr(item_shapes, 'keys'):
-        item_shapes = (item_shapes,)
-    for shape in item_shapes:
-        url = shape['asset']
-        metadata = get_item_asset(url)
-        defaults = {'size': metadata.get('size', 0),
-         'version': 0,
-         'timestamp': None,
-         'shapetag': shape}
-        new_shape, created = Shape.objects.get_or_create(item=asset,
-                vs_id=metadata.get('id'), defaults=defaults)
