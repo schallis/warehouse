@@ -84,8 +84,11 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.admin',
+    'debug_toolbar',
     'reporting',
 )
+
+#INTERNAL_IPS = ('127.0.0.1', )
 
 LOGGING = {
     'version': 1,

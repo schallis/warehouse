@@ -35,10 +35,11 @@ class ShapeInline(admin.TabularInline):
 class AssetAdmin(ReadOnlyAdmin):
     actions = None
     inlines = ShapeInline,
-    fields = ('vs_id', 'username', 'filename', 'all_sites', 'created', 'deleted',
-            'raw_data', 'last_synced', 'last_sync', 'id')
-    list_display = ('vs_id', 'username', 'all_sites', 'storage_size',
-            'last_sync')
+    fields = ('vs_id', 'username', 'filename', 'created', 'deleted',
+            'raw_data', 'last_synced', 'last_sync', 'id', 'storage_size')
+    list_display = ('vs_id', 'username', 'last_sync')
+
+    #WARNING: Both of the below execute SQL for *each row* and are slow
 
     def storage_size(self, obj):
         total_bytes = obj.shape_set.aggregate(Sum('size'))['size__sum'] or 0

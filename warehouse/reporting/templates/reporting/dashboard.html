@@ -43,6 +43,7 @@
             <th>Domain</th>
             <th>Total Size</th>
             <th>Assets</th>
+            <th>Transcodes</th>
             <th>Uploaders</th>
         </tr>
     {% for site in size_by_site %}
@@ -50,6 +51,7 @@
         <td>{{site.domain}}</td>
         <td>{{site.size|filesizeformat}}</td>
         <td>{{site.count}}</td>
+        <td>{{site.transcodes}}</td>
         <td>{{site.uploaders}}</td>
     </tr>
     {% endfor %}

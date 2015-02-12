@@ -6,3 +6,4 @@ dateutils==0.6.6
 django-jsonfield==0.9.13
 django-azure-storage==0.0.1
 retrying==1.3.3
+django-debug-toolbar==1.2.2

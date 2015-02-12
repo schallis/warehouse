@@ -36,6 +36,7 @@ def dashboard(request):
             #.annotate(uploaders=Count('asset__username', distinct=True))
     size_by_site = all_sites.values('domain') \
             .annotate(
+                transcodes=Count('asset__shape'),
                 size=Sum('asset__shape__size'),
                 count=Count('asset', distinct=True),
                 uploaders=Count('asset__username', distinct=True)) \
