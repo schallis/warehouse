@@ -104,11 +104,12 @@ def process_single_asset(asset_data):
         shape_url = shape_data.get('asset')
         shape = get_shape(shape_url)
         shape_id = shape.get('id')
+        size = shape.get('size') or 0
 
         shape_fields = {
             'asset': asset,
             'vs_id': shape_id,
-            'size': shape.get('size'),
+            'size': size,
             'raw_data': dump_json(shape),
             'version': 0,
             'timestamp': None,
