@@ -37,6 +37,22 @@
     <!--{% endfor %}-->
     <!--</table>-->
     <!--<br/>-->
+    <h2>Total usage</h2>
+    <table>
+        <tr>
+            <th>Total Size</th>
+            <th>Assets</th>
+            <th>Transcodes</th>
+            <th>Uploaders</th>
+        </tr>
+    <tr>
+        <td>{{sizes.size|filesizeformat}}</td>
+        <td>{{sizes.count}}</td>
+        <td>{{sizes.transcodes}}</td>
+        <td>{{sizes.uploaders}}</td>
+    </tr>
+    </table>
+    <br/>
 
     <h2>Total usage per site</h2>
     <table>

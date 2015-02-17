@@ -60,6 +60,11 @@ def dashboard(request):
                 count=Count('asset', distinct=True),
                 uploaders=Count('asset__username', distinct=True)) \
             .order_by('-size')
+    sizes = all_sites.aggregate(
+                count=Count('asset', distinct=True),
+                transcodes=Count('asset__shape'),
+                size=Sum('asset__shape__size'),
+                uploaders=Count('asset__username', distinct=True))
     top_uploaders = all_sites.values('domain', 'asset__username') \
             .annotate(count=Count('asset')).order_by('-count')[:20]
 
@@ -67,6 +72,7 @@ def dashboard(request):
         'site_header': admin.site.site_header,
         'last_sync': last_sync,
         'last_syncs': sync_runs[:5],
+        'sizes': sizes,
         'size_by_site': size_by_site,
         'top_uploaders': top_uploaders,
     }
