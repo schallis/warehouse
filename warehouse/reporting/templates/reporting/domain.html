@@ -2,7 +2,7 @@
 
 {% block content %}
 <div id="content-main">
-    <h1>Dashboard</h1>
+    <h1>{{domain}}</h1>
     <h2>Recent Syncs</h2>
     <p>Data is this dashboard is only as up-to-date as the most recent sync for any given site.</p>
     <table>
@@ -14,7 +14,7 @@
         </tr>
     {% for sync in last_syncs %}
     <tr>
-        <td><a href="{% url 'reporting.views.domain' sync.site.domain %}">{{sync.site.domain}}</a></td>
+        <td><a href="{% url 'reporting.views.domain' sync.site.domain  %}">{{sync.site.domain}}</a></td>
         <td>{{sync.start_time}}</td>
         <td>{{sync.end_time}}</td>
         <td>{{sync.completed}}</td>
@@ -38,7 +38,7 @@
     <!--</table>-->
     <!--<br/>-->
 
-    <h2>Total usage per site</h2>
+    <h2>Total usage</h2>
     <table>
         <tr>
             <th>Domain</th>
