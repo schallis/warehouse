@@ -53,6 +53,7 @@ def dashboard(request):
             #.annotate(count=Count('asset')).order_by('-count')
     #num_uploaders_by_site = all_sites.values('domain') \
             #.annotate(uploaders=Count('asset__username', distinct=True))
+    # TODO: add days since last since per site
     size_by_site = all_sites.values('domain') \
             .annotate(
                 transcodes=Count('asset__shape'),
