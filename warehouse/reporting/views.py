@@ -13,7 +13,7 @@ from reporting.models import Asset, SyncRun, Site
 
 
 def domain(request, domain):
-    sync_runs = SyncRun.objects.filter(site__domain=domain).order_by('-start_time')
+    sync_runs = SyncRun.objects.filter(site__domain__contains=domain).order_by('-start_time')
     try:
         last_sync = sync_runs.filter(completed=True)[0]
     except IndexError:
@@ -85,14 +85,14 @@ def dashboard(request):
                 size=Sum('asset__shape__size'),
                 count=Count('asset', distinct=True),
                 uploaders=Count('asset__username', distinct=True)) \
-            .order_by('-size')
+            .order_by('-size')[:10]
     sizes = all_sites.aggregate(
                 count=Count('asset', distinct=True),
                 transcodes=Count('asset__shape'),
                 size=Sum('asset__shape__size'),
                 uploaders=Count('asset__username', distinct=True))
     top_uploaders = all_sites.values('domain', 'asset__username') \
-            .annotate(count=Count('asset')).order_by('-count')[:20]
+            .annotate(count=Count('asset')).order_by('-count')[:10]
 
     params = {
         'site_header': admin.site.site_header,

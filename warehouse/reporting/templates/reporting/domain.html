@@ -1,8 +1,57 @@
-<!--{% extends 'admin/index.html' %}-->
-
 {% block content %}
 <div id="content-main">
-    <h1>{{domain}}</h1>
+    <h1>ZONZA Reporting - {{domain}}</h1>
+
+    <h2>Total usage</h2>
+    <table>
+        <tr>
+            <th>Total Size</th>
+            <th>Assets</th>
+            <th>Transcodes</th>
+            <th>Uploaders</th>
+        </tr>
+    {% for site in size_by_site %}
+    <tr>
+        <td>{{site.size|filesizeformat}}</td>
+        <td>{{site.count}}</td>
+        <td>{{site.transcodes}}</td>
+        <td>{{site.uploaders}}</td>
+    </tr>
+    {% endfor %}
+    </table>
+    <br/>
+
+    <!--<h2># uploaders per site</h2>-->
+    <!--<table>-->
+        <!--<tr>-->
+            <!--<th>Domain</th>-->
+            <!--<th>Uploaders</th>-->
+        <!--</tr>-->
+    <!--{% for site in num_uploaders_by_site %}-->
+    <!--<tr>-->
+        <!--<td><a href="{% url 'reporting.views.domain' site.domain  %}">{{site.domain}}</a></td>-->
+        <!--<td>{{site.uploaders}}</td>-->
+    <!--</tr>-->
+    <!--{% endfor %}-->
+    <!--</table>-->
+    <!--<br/>-->
+
+    <h2>Top uploaders</h2>
+    {{ uploader_by_site}}
+    <table>
+        <tr>
+            <th>User</th>
+            <th>Uploads</th>
+        </tr>
+    {% for site in top_uploaders%}
+    <tr>
+        <td>{{site.asset__username}}</td>
+        <td>{{site.count}}</td>
+    </tr>
+    {% endfor %}
+    </table>
+    <br/>
+
     <h2>Recent Syncs</h2>
     <p>Data is this dashboard is only as up-to-date as the most recent sync for any given site.</p>
     <table>
@@ -37,60 +86,6 @@
     <!--{% endfor %}-->
     <!--</table>-->
     <!--<br/>-->
-
-    <h2>Total usage</h2>
-    <table>
-        <tr>
-            <th>Domain</th>
-            <th>Total Size</th>
-            <th>Assets</th>
-            <th>Transcodes</th>
-            <th>Uploaders</th>
-        </tr>
-    {% for site in size_by_site %}
-    <tr>
-        <td><a href="{% url 'reporting.views.domain' site.domain  %}">{{site.domain}}</a></td>
-        <td>{{site.size|filesizeformat}}</td>
-        <td>{{site.count}}</td>
-        <td>{{site.transcodes}}</td>
-        <td>{{site.uploaders}}</td>
-    </tr>
-    {% endfor %}
-    </table>
-    <br/>
-
-    <!--<h2># uploaders per site</h2>-->
-    <!--<table>-->
-        <!--<tr>-->
-            <!--<th>Domain</th>-->
-            <!--<th>Uploaders</th>-->
-        <!--</tr>-->
-    <!--{% for site in num_uploaders_by_site %}-->
-    <!--<tr>-->
-        <!--<td><a href="{% url 'reporting.views.domain' site.domain  %}">{{site.domain}}</a></td>-->
-        <!--<td>{{site.uploaders}}</td>-->
-    <!--</tr>-->
-    <!--{% endfor %}-->
-    <!--</table>-->
-    <!--<br/>-->
-
-    <h2>Top uploaders</h2>
-    {{ uploader_by_site}}
-    <table>
-        <tr>
-            <th>Domain</th>
-            <th>User</th>
-            <th>Uploads</th>
-        </tr>
-    {% for site in top_uploaders%}
-    <tr>
-        <td><a href="{% url 'reporting.views.domain' site.domain  %}">{{site.domain}}</a></td>
-        <td>{{site.asset__username}}</td>
-        <td>{{site.count}}</td>
-    </tr>
-    {% endfor %}
-    </table>
-    <br/>
 
 </div>
 {% endblock %}
