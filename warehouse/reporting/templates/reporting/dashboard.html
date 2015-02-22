@@ -1,44 +1,11 @@
-{% extends 'admin/index.html' %}
+<!--{% extends 'admin/index.html' %}-->
 
 {% block content %}
 <div id="content-main">
     <h1>Dashboard</h1>
-    <h2>Recent Syncs</h2>
-    <p>Data is this dashboard is only as up-to-date as the most recent sync for any given site.</p>
-    <table>
-        <tr>
-            <th>Domain</th>
-            <th>Start</th>
-            <th>End</th>
-            <th>Completed?</th>
-        </tr>
-    {% for sync in last_syncs %}
-    <tr>
-        <td><a href="{% url 'reporting.views.domain' sync.site.domain %}">{{sync.site.domain}}</a></td>
-        <td>{{sync.start_time}}</td>
-        <td>{{sync.end_time}}</td>
-        <td>{{sync.completed}}</td>
-    </tr>
-    {% endfor %}
-    </table>
-    <br/>
 
-    <!--<h2># of assets per site</h2>-->
-    <!--<table>-->
-        <!--<tr>-->
-            <!--<th>Domain</th>-->
-            <!--<th>Assets</th>-->
-        <!--</tr>-->
-    <!--{% for site in num_assets_by_site %}-->
-    <!--<tr>-->
-        <!--<td><a href="{% url 'reporting.views.domain' site.domain  %}">{{site.domain}}</a></td>-->
-        <!--<td>{{site.count}}</td>-->
-    <!--</tr>-->
-    <!--{% endfor %}-->
-    <!--</table>-->
-    <!--<br/>-->
-
-    <h2>Total usage per site</h2>
+    <h2>Usage per site</h2>
+    <p><a href="{% url 'reporting.views.download_csv' %}">Download as CSV</a></p>
     <table>
         <tr>
             <th>Domain</th>
@@ -98,6 +65,44 @@
     {% endfor %}
     </table>
     <br/>
+
+    <h2>Recent Syncs</h2>
+    <p>Data is this dashboard is only as up-to-date as the most recent sync for any given site.</p>
+    <table>
+        <tr>
+            <th>Domain</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Completed?</th>
+        </tr>
+    {% for sync in last_syncs %}
+    <tr>
+        <td><a href="{% url 'reporting.views.domain' sync.site.domain %}">{{sync.site.domain}}</a></td>
+        <td>{{sync.start_time}}</td>
+        <td>{{sync.end_time}}</td>
+        <td>{{sync.completed}}</td>
+    </tr>
+    {% endfor %}
+    </table>
+    <br/>
+
+    <!--<h2># of assets per site</h2>-->
+    <!--<table>-->
+        <!--<tr>-->
+            <!--<th>Domain</th>-->
+            <!--<th>Assets</th>-->
+        <!--</tr>-->
+    <!--{% for site in num_assets_by_site %}-->
+    <!--<tr>-->
+        <!--<td><a href="{% url 'reporting.views.domain' site.domain  %}">{{site.domain}}</a></td>-->
+        <!--<td>{{site.count}}</td>-->
+    <!--</tr>-->
+    <!--{% endfor %}-->
+    <!--</table>-->
+    <!--<br/>-->
+
+
+
 
 </div>
 {% endblock %}

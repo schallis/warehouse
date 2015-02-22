@@ -8,5 +8,6 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^$', views.dashboard, name='dashboard'),
-    url(r'^(?P<domain>.+)/', views.domain, name='domain'),
+    url(r'^download/$', views.download_csv, name='download_csv'),
+    url(r'^domain/(?P<domain>.+)/', views.domain, name='domain'),
 )

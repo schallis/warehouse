@@ -1,7 +1,11 @@
+from cStringIO import StringIO
+
+from django.http import HttpResponse
 from django.contrib.admin.views.decorators import staff_member_required
 from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.template.context import RequestContext
+from django.db import connection
 from django.db.models import Count, Sum, Max
 from django.contrib import admin
 
@@ -38,6 +42,27 @@ def domain(request, domain):
 
     return render(request, 'reporting/domain.html', params,
                   context_instance=RequestContext(request))
+
+
+def download_csv(domain):
+    csv_file = StringIO()
+
+    # Postgres generates CSV for us, we just serve it directly to the user
+    raw_sql = """COPY
+    (SELECT
+        id,
+        raw_data::json->'metadata'->>'zonza_site' as "Sites",
+        raw_data::json->'metadata'->>'trials_category' as "Category"
+    FROM reporting_asset)
+    TO STDOUT CSV HEADER;"""
+    cursor = connection.cursor()
+    cursor.copy_expert(raw_sql, csv_file)
+
+    filename = 'zonza-asset-report.csv'
+    response = HttpResponse(csv_file.getvalue(), content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
+
+    return response
 
 
 def dashboard(request):
