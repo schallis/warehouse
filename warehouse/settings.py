@@ -42,10 +42,13 @@ DATETIME_FORMAT = 'N j, Y, P (T)'
 MEDIA_ROOT = ''
 MEDIA_URL = ''
 
-STATIC_ROOT = 'D:/home/site/wwwroot/static'
-# STATIC_URL = '/static/'
-STATIC_URL = 'https://portalvhds52l58tfthh6wl.blob.core.windows.net/staticfiles/'
-STATICFILES_STORAGE = 'azure_storage.storage.AzureStorage'
+if os.environ.get('APPSETTING_LOCAL_STATIC') == 'true':
+    STATIC_ROOT = 'static/'
+    STATIC_URL = '/static/'
+else:
+    STATIC_ROOT = 'D:/home/site/wwwroot/static'
+    STATIC_URL = 'https://portalvhds52l58tfthh6wl.blob.core.windows.net/staticfiles/'
+    STATICFILES_STORAGE = 'azure_storage.storage.AzureStorage'
 
 ADMIN_MEDIA_PREFIX = '/static/admin/'
 
