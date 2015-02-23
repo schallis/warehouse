@@ -1,6 +1,22 @@
+{% load staticfiles %}
+
+<html>
+<head>
+    <style>
+        .graph {
+            background-color: #fafafa;
+            border-radius: 5px;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+
 {% block content %}
 <div id="content-main">
     <h1>ZONZA Reporting Dashboard</h1>
+
+    <div class="graph" id="graph-usage"></div>
 
     <h2>Usage per site</h2>
     <p><a href="{% url 'reporting.views.download_csv' %}">Download as CSV</a></p>
@@ -31,27 +47,12 @@
     </table>
     <br/>
 
-    <!--<h2># uploaders per site</h2>-->
-    <!--<table>-->
-        <!--<tr>-->
-            <!--<th>Domain</th>-->
-            <!--<th>Uploaders</th>-->
-        <!--</tr>-->
-    <!--{% for site in num_uploaders_by_site %}-->
-    <!--<tr>-->
-        <!--<td><a href="{% url 'reporting.views.domain' site.domain  %}">{{site.domain}}</a></td>-->
-        <!--<td>{{site.uploaders}}</td>-->
-    <!--</tr>-->
-    <!--{% endfor %}-->
-    <!--</table>-->
-    <!--<br/>-->
-
     <h2>Top uploaders</h2>
     {{ uploader_by_site}}
     <table>
         <tr>
             <th>Domain</th>
-            <th>User</th>
+            <th>Username</th>
             <th>Uploads</th>
         </tr>
     {% for site in top_uploaders%}
@@ -83,24 +84,87 @@
     {% endfor %}
     </table>
     <br/>
-
-    <!--<h2># of assets per site</h2>-->
-    <!--<table>-->
-        <!--<tr>-->
-            <!--<th>Domain</th>-->
-            <!--<th>Assets</th>-->
-        <!--</tr>-->
-    <!--{% for site in num_assets_by_site %}-->
-    <!--<tr>-->
-        <!--<td><a href="{% url 'reporting.views.domain' site.domain  %}">{{site.domain}}</a></td>-->
-        <!--<td>{{site.count}}</td>-->
-    <!--</tr>-->
-    <!--{% endfor %}-->
-    <!--</table>-->
-    <!--<br/>-->
-
-
-
-
 </div>
+</body>
+
 {% endblock %}
+    <script src="{% static "js/react-with-addons.js" %}"></script>
+    <script src="{% static "js/JSXTransformer.js" %}"></script>
+    <script src="{% static "js/d3.js" %}"></script>
+    <script type="text/jsx">
+      var PercentChart = React.createClass({
+
+        componentDidMount: function() {
+          var el = this.getDOMNode();
+          var svg = d3.select(el).append('svg')
+              .attr('class', 'd3')
+              .attr('width', this.props.size)
+              .attr('height', this.props.size);
+
+          // Translate percentage to radians
+          var scale = d3.scale
+                .linear()
+                .domain([0, 100])
+                .range([0, 2 * Math.PI]);
+
+          var arc = d3.svg.arc()
+              .innerRadius(this.props.size/4)
+              .outerRadius(this.props.size/2)
+              .startAngle(function(d) { return scale(d[0]) })
+              .endAngle(function(d) { return scale(d[1]) });
+
+          data = [[0,40,"#2bcabf"],   // teal
+                  [40,65,"#d83d3c"],  // red
+                  [65,75,"#f8b143"],  // yellow
+                  [75,100,"#aaa"]]    // grey
+
+          var offset = this.props.size / 2
+          svg.selectAll("path")
+              .data(data)
+              .enter()
+              .append("path")
+              .attr("d", arc)
+              .style("fill", function(d){ return d[2] })
+              .attr("transform", "translate(" + offset + "," + offset + ")");
+
+            svg.append("text").text(this.props.label)
+                .attr("font-size", "1.8em")
+                .attr("fill", "#aaa")
+                .attr("x", this.props.size/2)
+                .attr("y", this.props.size/2)
+                .attr("text-anchor", "middle")
+                .attr("dy", ".35em");
+        },
+
+        componentDidUpdate: function() {
+        },
+
+        componentWillUnmount: function() {
+          var el = this.getDOMNode();
+          //TODO?
+        },
+        render: function() {
+          var percent = this.props.percent;
+          var label = this.props.label;
+
+          //return <svg><circle cx="{size/2}" cy="{size/2}" r="size/2" fill="#d0d0d0" stroke=></circle></svg>;
+          //return  <svg xmlns="http://www.w3.org/2000/svg" version="1.1"> <circle cx="100" cy="50" r="40" stroke="black" stroke-width="30" fill="none" /> <circle cx="100" cy="100" r="40" stroke="red" stroke-width="20px" fill="none" />
+          return <div className="Chart"></div>
+        }
+      });
+      var DashboardApplication = React.createClass({
+        render: function() {
+          var total = this.props.total.size;
+          var message =
+            'Total storage is ' + total + ' bytes.';
+
+          return <p>{message}</p>;
+        }
+      });
+      var label = "{{sizes.size|filesizeformat}}";
+      var total = {{sizes|safe}};
+      React.render(<PercentChart percent="30" label={label} size="200" />,
+        document.getElementById('graph-usage')
+      );
+    </script>
+</html>
