@@ -1,4 +1,5 @@
 from cStringIO import StringIO
+import json
 
 from django.http import HttpResponse
 from django.contrib.admin.views.decorators import staff_member_required
@@ -6,8 +7,9 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.template.context import RequestContext
 from django.db import connection
-from django.db.models import Count, Sum, Max
+from django.db.models import Count, Sum, Max, F
 from django.contrib import admin
+from django.core.urlresolvers import reverse
 
 from reporting.models import Asset, SyncRun, Site
 
@@ -85,7 +87,7 @@ def dashboard(request):
                 size=Sum('asset__shape__size'),
                 count=Count('asset', distinct=True),
                 uploaders=Count('asset__username', distinct=True)) \
-            .order_by('-size')[:10]
+            .order_by('-count')[:10]
     sizes = all_sites.aggregate(
                 count=Count('asset', distinct=True),
                 transcodes=Count('asset__shape'),
@@ -93,6 +95,13 @@ def dashboard(request):
                 uploaders=Count('asset__username', distinct=True))
     top_uploaders = all_sites.values('domain', 'asset__username') \
             .annotate(count=Count('asset')).order_by('-count')[:10]
+    x = [x for x in all_sites.values('domain')
+            .annotate(size=Count('asset__shape'))
+            .values_list('domain', 'size')
+            .order_by('-size')]
+    graph_assets_data = x[:5]
+    graph_assets_data = [[x,y,reverse('reporting.views.domain', args=(x,))] for x, y in graph_assets_data]
+    # [["teamhills.zonza.tv", null], ["deluxe.zonza.tv", null], ["trials.zonza.tv", 243497942962], ["grey.zonza.tv", 135888998176], ["230pas.zonza.tv", 48393166596], ["zonzacompany.zonza.tv", 5456789214], ["trg-deluxe.zonza.tv", 2953964488], ["gmi-deluxe.zonza.tv", 2182796439]]'
 
     params = {
         'site_header': admin.site.site_header,
@@ -101,6 +110,7 @@ def dashboard(request):
         'sizes': sizes,
         'size_by_site': size_by_site,
         'top_uploaders': top_uploaders,
+        'graph_assets_data': json.dumps(graph_assets_data)
     }
 
     return render(request, 'reporting/dashboard.html', params,

@@ -1,0 +1,1870 @@
+@import url(https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic|Varela|Open+Sans:300italic,400italic,600italic,700italic,400,600,700,300|Open+Sans+Condensed:300,300italic,700);
+@import url(https://fonts.googleapis.com/css?family=Roboto:400,300,300italic,400italic,500,500italic,700,700italic);
+@import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono|Droid+Sans+Mono|Source+Code+Pro:400,600);
+
+@media (min-width: 1200px) {
+	.container {
+		max-width: 1570px;
+	}
+}
+
+/* iPads (landscape) ----------- */
+@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) and (orientation : landscape) {
+	.z-panel-side {
+		width: 440px;
+	}
+}
+
+body {
+	background: #fff;
+	font-family: 'Lato', sans-serif;
+	font-family: 'Roboto', sans-serif;
+	font-family: 'source-sans-pro', sans-serif;
+	font-family: 'Droid Sans Mono', sans-serif;
+	font-family: 'Source Code Pro', sans-serif;
+	font-family: 'Ubuntu Mono', sans-serif;
+	font-family: 'Open Sans', sans-serif;
+	/* font-family: 'Helvetica', 'Arial', sans-serif; */
+}
+.label,
+.badge,
+b,
+strong,
+h2,
+h3,
+h4,
+th {
+	font-weight: 600;
+}
+label {
+	font-weight: 400;
+}
+.text-normal {
+	color: #333;
+}
+h3 {
+	font-size: 18px;
+}
+h4 {
+	font-size: 16px;
+	margin-top: 20px;
+}
+
+/*
+.form-control,
+.well {
+	border-radius: 0;
+}*/
+
+/* Bootstrap overrides */
+
+.label {
+	border-radius: 40px;
+	display: inline-block;
+	font-size: 12px;
+	line-height: 1;
+	max-width: 140px;
+	padding: 4px 10px;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.btn-toolbar > .btn, .btn-toolbar > .btn-group, .btn-toolbar > .input-group {
+	margin-left: 10px;
+}
+.btn-toolbar {
+	margin-left: -10px;
+}
+.dropdown-menu.small a {
+	font-size: 12px;
+}
+
+#loadingIndicator {
+	border-radius: 0;
+	box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+	position: absolute;
+	top: 104px;
+	left: 50%;
+	z-index: 9999;
+	padding: 5px 10px 5px 40px;
+	width: 11em;
+	margin-left:-5.5em;
+}
+.col-no-padding {
+	padding: 0;
+}
+.control-label {
+	font-weight: 400;
+}
+.table th {
+	background-color: #e5e5e5;
+}
+
+/* Top navigation */
+
+.z-navbar {
+	height: 70px;
+	border: 0;
+	margin-bottom: 0;
+}
+.z-navbar .z-site-nav a {
+	font-weight: 600;
+	line-height: 23px;
+	padding: 23px 10px;
+	text-transform: uppercase;
+}
+.z-navbar .z-site-nav .fa {
+	font-size: 24px;
+	vertical-align: top;
+}
+.z-logo {
+	padding: 22px 20px;
+}
+.z-logo img {
+	max-height: 50px;
+}
+.z-usernav {
+	margin: 10px 20px;
+}
+.z-usernav > li > a {
+	padding: 15px 10px;
+	height: 50px;
+}
+.z-profile-picture {
+	height: 40px;
+	max-width: 40px;
+}
+.z-user-placeholder {
+	background-color: rgba(0,0,0,0.3);
+	border-radius: 20px;
+	color: #fff;
+	display: inline-block;
+	font-size: 18px;
+	line-height: 1.0;
+	padding: 10px 0;
+	height: 40px;
+	width: 40px;
+	text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+	text-align: center;
+	vertical-align: middle;
+}
+.z-user-placeholder-none {
+}
+.z-navbar .z-profile-picture,
+.z-navbar .z-user-placeholder {
+	margin: -10px 0;
+}
+
+/* Page header toolbar */
+
+.z-toolbar {
+	background-color: #333;
+	border: 0;
+	color: #999;
+	margin-bottom: 0;
+	padding: 10px 20px;
+	min-height: 0;
+	z-index: 1;
+}
+.z-toolbar h1 {
+	color: #fff;
+	font-size: 18px;
+	font-weight: 300;
+	line-height: 20px;
+	text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+	margin: 5px 0;
+	vertical-align: middle;
+}
+.z-toolbar .z-project-id {
+	font-size: 14px;
+	font-weight: 600;
+	margin: 0 5px;
+}
+.z-toolbar h1 .label {
+	display: inline-block;
+	vertical-align: top;
+}
+.z-toolbar .z-project-options {
+	float: right;
+	margin-top: 0;
+	margin-bottom: 0;
+}
+.z-toolbar .z-project-options:last-child {
+	margin-right: 0;
+}
+.z-subnav a:hover .caret {
+	border-top-color: #fff;
+}
+.z-subnav .navbar-nav .open>a.btn {
+	background-color: #858585;
+}
+.z-subnav a.btn {
+	margin-top: 10px;
+}
+
+
+/* Page layout */
+
+.z-panel {
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	overflow: auto;
+	-webkit-overflow-scrolling: touch;
+}
+.z-panel-container,
+.z-panel-navigation {
+	top: 120px;
+}
+.z-panel-container {
+	left: 100px;
+	overflow: hidden;
+}
+.z-panel-container-full {
+	left: 0;
+}
+.z-panel-navigation {
+	right: auto;
+	width: 100px;
+}
+.z-panel-md-header {
+	top: 51px;
+}
+.z-panel-lg-header {
+	top: 91px;
+}
+.z-panel-padding {
+	padding: 0 20px;
+}
+.z-panel-padding-vertical {
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+
+/* Used for list & detail views, e.g. Jobs */
+.z-panel-main {
+	left: 0;
+	-webkit-transform: translate3d(0,0,0);
+	transition: right 0.25s;
+}
+.z-panel-side-open .z-panel-main {
+	right: 500px;
+}
+.z-panel-side {
+	width: 500px;
+	left: auto;
+	right: 0;
+	transition: all 0.25s;
+	-webkit-transform: translate3d(500px,0,0);
+	   -moz-transform: translate3d(500px,0,0);
+	    -ms-transform: translate3d(500px,0,0);
+	     -o-transform: translate3d(500px,0,0);
+	        transform: translate3d(500px,0,0);
+}
+.z-panel-side-open .z-panel-side {
+	-webkit-transform: translate3d(0,0,0);
+	   -moz-transform: translate3d(0,0,0);
+	    -ms-transform: translate3d(0,0,0);
+	     -o-transform: translate3d(0,0,0);
+	        transform: translate3d(0,0,0);
+}
+
+/* Used for one page views with 2 columns, e.g. Estimates */
+.z-panel-left {
+	right: 40%;
+}
+.z-panel-right {
+	left: auto;
+	right: 0;
+	width: 40%;
+}
+
+
+/* Responsive stuff */
+
+.z-panel-side-open .z-panel-main {
+	right: 550px;
+}
+.z-panel-side {
+	width: 550px;
+	-webkit-transform: translate3d(550px,0,0);
+	   -moz-transform: translate3d(550px,0,0);
+	    -ms-transform: translate3d(550px,0,0);
+	     -o-transform: translate3d(550px,0,0);
+	        transform: translate3d(550px,0,0);
+}
+.z-panel-side .z-items .z-table-container,
+.z-panel-side .z-workflow-text {
+	margin: 10px 0;
+}
+/*
+.z-panel-side-open .z-panel-main {
+	transition: right 0.3s;
+}
+.z-panel-side {
+	transition: width 0.3s;
+}
+*/
+@media only screen and (max-width : 960px) {
+	.z-panel-side-open .z-panel-main {
+		right: 500px;
+	}
+	.z-panel-side-open .z-panel-side {
+		width: auto;
+		left: 0;
+	}
+}
+@media only screen and (min-width : 960px) {
+	.z-panel-side-open .z-panel-main {
+		right: 500px;
+	}
+	.z-panel-side {
+		width: 500px;
+		-webkit-transform: translate3d(500px,0,0);
+		   -moz-transform: translate3d(500px,0,0);
+		    -ms-transform: translate3d(500px,0,0);
+		     -o-transform: translate3d(500px,0,0);
+		        transform: translate3d(500px,0,0);
+	}
+}
+@media only screen and (min-width : 1200px) {
+	.z-panel-side-open .z-panel-main {
+		right: 550px;
+	}
+	.z-panel-side {
+		-webkit-transform: translate3d(550px,0,0);
+		   -moz-transform: translate3d(550px,0,0);
+		    -ms-transform: translate3d(550px,0,0);
+		     -o-transform: translate3d(550px,0,0);
+		        transform: translate3d(550px,0,0);
+		width: 550px;
+	}
+}
+@media only screen and (min-width : 1300px) {
+	.z-panel-side-open .z-panel-main {
+		right: 600px;
+	}
+	.z-panel-side {
+		-webkit-transform: translate3d(600px,0,0);
+		   -moz-transform: translate3d(600px,0,0);
+		    -ms-transform: translate3d(600px,0,0);
+		     -o-transform: translate3d(600px,0,0);
+		        transform: translate3d(600px,0,0);
+		width: 600px;
+	}
+}
+@media only screen and (min-width : 1400px) {
+	.z-panel-side-open .z-panel-main {
+		right: 650px;
+	}
+	.z-panel-side {
+		-webkit-transform: translate3d(650px,0,0);
+		   -moz-transform: translate3d(650px,0,0);
+		    -ms-transform: translate3d(650px,0,0);
+		     -o-transform: translate3d(650px,0,0);
+		        transform: translate3d(650px,0,0);
+		width: 650px;
+	}
+}
+
+
+/* Page navigation (Projects, etc.) */
+
+.z-panel-navigation {
+	background-color: #444;
+}
+.z-panel-navigation .nav a {
+	border-radius: 0;
+	color: #999;
+	font-weight: 400;
+	font-size: 12px;
+	padding-top: 15px;
+	padding-bottom: 15px;
+	text-align: center;
+	text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.z-panel-navigation .nav a {
+	border-radius: 0;
+	color: #aaa;
+	padding-left: 20px;
+	padding-left: 0;
+	padding-right: 0;
+	text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+}
+.z-panel-navigation .fa {
+	display: block;
+	/*display: none;*/
+	font-size: 21px;
+	margin-bottom: 5px;
+}
+.z-panel-navigation .nav a:hover,
+.z-panel-navigation .nav a:focus{
+	background-color: #333;
+	color: #ccc;
+}
+.z-panel-navigation .nav a:hover .fa {
+	color: #eee;
+}
+.z-panel-navigation .nav .active a,
+.z-panel-navigation .nav .active a:hover {
+	color: #fff;
+}
+.z-panel-navigation .nav li {
+	margin-top: 0;
+}
+.z-panel-navigation .nav .active a,
+.z-panel-navigation .nav .active a:hover {
+	background-color: #555;
+}
+
+/* Panel headers */
+
+.z-panel-header {
+	background-color: #f5f5f5;
+	border-bottom: 1px solid #ddd;
+	padding: 10px 20px;
+}
+.z-panel-side .z-panel-header {
+	padding-right: 160px;
+}
+.z-panel-header h2,
+.z-panel-header h3 {
+	line-height: 30px;
+	margin: 0;
+	overflow: hidden;
+	white-space: nowrap;
+	text-overflow: ellipsis;
+}
+.z-panel-header-jobs h2,
+.z-panel-header-jobs h3 {
+}
+.z-panel-header h2 {
+	font-size: 20px;
+}
+.z-panel-header h3 {
+	font-size: 16px;
+}
+.z-panel-header .z-job-buttons {
+	position: absolute;
+	right: 20px;
+	top: 10px;
+}
+.z-panel-header .z-checkbox-group {
+	margin: 7px 0 7px 20px;
+}
+
+
+/* Side panel (Jobs) */
+
+.z-panel-side {
+	background-color: #fff;
+}
+.z-panel-side-open .z-panel-side {
+	box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+.z-panel-side-content section {
+	padding-top: 20px;
+}
+.z-panel-side-content hr {
+	border-color: #eee;
+	margin-bottom: 0;
+}
+.z-panel-side-content .form-group {
+	margin-bottom: 5px;
+}
+.z-panel .z-data-label {
+	color: #999;
+	font-weight: 400;
+	text-align: right;
+}
+.z-data-value {
+	padding-bottom: 0;
+}
+.z-panel-side-content h4:first-child {
+	margin-top: 0;
+}
+.z-panel-side-content h4 {
+	font-size: 16px;
+}
+#closeJob {
+	padding: 4px 0 0 10px;
+}
+
+/* Job navigation (vertical) */
+
+.z-job-nav {
+	background-color: #eee;
+	/*display: none;*/
+	top: 85px;
+	left: 0;
+	width: 40px;
+	overflow: hidden;
+}
+.z-job-nav li a {
+	border-radius: 0;
+	color: #777;
+	font-size: 14px;
+	padding: 10px 0;
+	text-align: center;
+}
+.z-job-nav li a:hover {
+	color: #444;
+}
+.z-job-nav li.active a,
+.z-job-nav li.active a:hover {
+	background-color: #ddd;
+	color: #333;
+}
+.z-job-nav .z-badge {
+	background-color: rgba(0,0,0,0.3);
+	border-radius: 10px;
+	color: #fff;
+	font-size: 12px;
+	line-height: 1.0;
+	padding: 2px 6px;
+}
+
+
+/* Job navigation (tabs) */
+
+.z-panel-header .z-job-tabs {
+	min-width: 400px;
+}
+.z-panel-header .nav {
+	margin-top: 11px;
+	margin-bottom: -11px;
+}
+.z-panel-header .nav > li > a {
+	padding-left: 10px;
+	padding-right: 10px;
+	line-height: 18px;
+}
+.nav-tabs > li.active > a, .nav-tabs > li.active > a:hover, .nav-tabs > li.active > a:focus {
+	background-color: #fff;
+}
+.z-job-tabs li a .fa {
+	color: #666;
+	font-size: 14px;
+	display: none;
+}
+
+
+/* List panel heading (Job categories, disciplines, etc.) */
+
+.z-job-panel {
+	box-shadow: none;
+	border-radius: 0;
+	border-width: 0;
+	border-top-width: 1px;
+	clear: left;
+	margin: -1px 0 0;
+}
+.z-panel-padding .z-job-panel {
+	margin: -1px -20px 0 -20px;
+}
+.z-job-panel .nav li {
+	margin: 0;
+}
+.panel-default > .z-panel-heading {
+	background-color: #e5e5e5;
+	border-radius: 0;
+	font-weight: 600;
+	height: 30px;
+	padding: 5px 20px 5px 55px;
+	position: relative;
+}
+.z-panel-heading .z-expander,
+.z-panel-heading .z-checkbox {
+	position: absolute;
+}
+.z-panel-heading .z-checkbox {
+	top: 6px;
+	left: 30px;
+}
+.z-panel-heading .z-expander {
+	height: 30px;
+	top: 0;
+	left: 0;
+	padding-left: 0;
+	width: 30px;
+}
+.z-panel-heading .z-expander .fa {
+	vertical-align: top;
+}
+
+/* Nav list (Jobs, etc.) */
+
+.z-job a {
+	background-color: #fff;
+}
+.z-job.active,
+.z-job-list .z-job.active > a,
+.z-job-list .z-job.active > a:hover,
+.z-job-list .z-job.active > a:focus {
+	background-color: #e3f1ff;
+	color: inherit;
+	outline: 0;
+}
+.z-job-panel .z-job-list .z-job > a {
+	border-radius: 0;
+}
+.z-job-panel .z-job-list .z-job {
+	border-bottom: 1px solid #ddd;
+	padding: 60px 0 0;
+	position: relative;
+}
+.z-job-panel .active .z-job {
+	border-color: #177fc3;
+}
+.z-job-panel .active > a > .text-muted {
+	color: inherit;
+}
+.z-job-name,
+.z-job-assignee,
+.z-job-code,
+.z-job-deadline,
+.z-job-status,
+.z-job .z-expander,
+.z-fixed-checkbox,
+.z-job-list .z-job > a,
+.z-workflow-radio {
+	position: absolute;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.z-job > a {
+	height: 60px;
+	top: 0;
+	right: 0;
+	left: 0;
+}
+.z-job-assignee {
+	left: 70px;
+	left: 30px;
+	display: none;
+}
+.z-job .z-checkbox {
+	left: 40px;
+	top: 22px;
+}
+.z-workflow-radio {
+	left: 30px;
+	top: 9px;
+}
+.z-job-name,
+.z-job-code {
+	left: 110px;
+	left: 70px;
+	right: 80px;
+}
+.z-job-code {
+	right: 150px;
+}
+.z-job-deadline {
+	right: 20px;
+	text-align: right;
+}
+.z-job-status {
+	line-height: 1.333;
+	top: 34px;
+}
+.z-job-status .label {
+	border-radius: 3px;
+	float: left;
+	font-size: 10px;
+	margin-right: 4px;
+	padding: 2px 4px;
+}
+.z-job-name,
+.z-job-assignee,
+.z-job-deadline {
+	top: 10px;
+}
+.z-job-code {
+	top: 32px;
+}
+.z-group-empty {
+	margin: 10px 20px;
+}
+
+/* Checkboxes, radio buttons & expander */
+
+.z-checkbox {
+	border: 1px solid rgba(0,0,0,0.2);
+	border-radius: 2px;
+	display: block;
+	font-size: 12px;
+	padding: 1px;
+	line-height: 1.0;
+}
+.z-radio {
+	border-radius: 100%;
+	border-width: 2px;
+	font-size: 10px;
+	line-height: 8px;
+	width: 15px;
+	height: 15px;
+	padding: 1px 0;
+}
+.z-radio .fa {
+	line-height: 1.0;
+}
+.z-checkbox-inactive,
+.z-checkbox-inactive:hover,
+.z-checkbox-inactive:focus {
+	background-color: #fff;
+	color: #ccc;
+}
+.z-checkbox-inactive .fa {
+	visibility: hidden;
+}
+.z-checkbox-inactive:hover .fa {
+	visibility: visible;
+}
+.z-expander {
+	font-size: 24px;
+	line-height: 20px;
+	top: 0;
+	left: 0;
+	padding: 0 0 0 10px;
+	height: 60px;
+	width: 40px;
+	z-index: 100;
+}
+.z-expander,
+.z-expander:focus {
+	color: rgba(0,0,0,0.5);
+	opacity: 0.75;
+}
+.z-expander:hover {
+	background-color: rgba(0,0,0,0.1);
+	color: rgba(0,0,0,0.75);
+	opacity: 1;
+}
+.active .z-expander {
+	color: rgba(0,0,0,0.75);
+}
+.z-expander .fa-angle-down {
+	margin-left: -1px;
+}
+
+
+/* Items table (tasks, etc.) */
+
+.z-items {
+	font-size: 12px;
+	line-height: 18px;
+}
+.z-items .z-profile-picture,
+.z-items .z-user-placeholder {
+	float: left;
+	height: 30px;
+	margin: -6px 5px -6px 0;
+	width: 30px;
+}
+.z-items .z-edit-input {
+	margin: -6px 5px -6px 0;
+}
+.z-items .z-user-placeholder,
+.z-extra-people {
+	font-size: 12px;
+	line-height: 20px;
+	padding: 5px 0;
+}
+.z-items .z-item-assignee .z-edit-value {
+	display: block;
+	margin-left: 35px;
+}
+.z-items .z-table-container {
+	background-color: #fff;
+	border: 1px solid #ddd;
+	border-bottom: 0;
+}
+.z-items .table {
+	margin-bottom: 0;
+	table-layout: fixed;
+}
+.z-items .table td {
+	border: 0;
+	border-bottom: 1px solid #ddd;
+	font-size: 12px;
+	line-height: 18px;
+	padding-top: 9px;
+	padding-right: 5px;
+	padding-bottom: 9px;
+	vertical-align: top;
+	word-wrap: break-word;
+}
+.z-items .table .z-item-active {
+	background-color: rgba(0,0,0,0.025);
+}
+.z-items .z-item-completed .z-profile-picture,
+.z-items .z-item-completed .z-user-placeholder {
+	opacity: 0.75;
+}
+.z-items .table td:first-child {
+	border-left: 3px solid rgba(255,255,255,0);
+}
+.z-items .table .z-item-active td:first-child {
+	border-left: 3px solid #f38a31;
+}
+.z-item-status {
+	width: 20px;
+}
+.z-item-checkbox {
+	padding-left: 6px;
+	padding-right: 10px;
+	width: 34px;
+}
+.z-items .table .z-item-remove {
+	padding-right: 5px;
+	text-align: right;	
+	width: 30px;
+}
+.z-item-remove .btn {
+	color: #999;
+	font-size: 16px;
+	line-height: 18px;
+	margin: -10px 0;
+	padding: 0;
+}
+.z-items .z-item-actions {
+	padding-left: 5px;
+	width: 75px;
+}
+.z-item-actions .btn-group {
+	margin: -6px 0;
+	white-space: nowrap;
+}
+.z-item-actions .btn-group > .btn {
+	display: inline-block;
+	float: none;
+}
+.z-item-actions .dropdown-menu {
+	font-size: 12px;
+}
+.z-item-remove .btn:hover {
+	color: #666;
+}
+.z-items .table .z-item-name {
+	/*width: 28%;*/
+}
+.z-items .table .z-item-due-date {
+	width: 90px;
+}
+.z-items .table .z-item-active .z-item-name {
+	font-weight: 700;
+}
+.z-job .z-items {
+}
+.z-job .expanded .z-items {
+	display: block;
+}
+.z-job-panel .nav .expanded {
+	height: auto;
+}
+.z-job-panel .nav .expanded .z-items {
+	display: block;
+}
+
+
+/* Choose workflow */
+
+.z-workflow-text {
+	margin: 0;
+}
+.z-choose-workflow {
+	margin: 0;
+}
+.z-choose-workflow .col-sm-6 {
+	padding-left: 5px;
+	padding-right: 0;
+}
+.z-choose-workflow .col-sm-6:first-child {
+	padding-right: 5px;
+	padding-left: 0;
+}
+.z-choose-workflow-button {
+	background-color: #fff;
+	border: 1px solid #ddd;
+	border-radius: 5px;
+	padding: 10px 10px 10px 50px;
+	position: relative;
+	text-align: left;
+	white-space: normal;
+}
+.z-choose-workflow-button:last-child {
+}
+.z-choose-workflow-button:first-child {
+	margin-left: 0;
+}
+.z-choose-workflow-button:hover {
+	background-color: #eee;
+	border-color: #ddd;
+	text-decoration: none;
+}
+.z-choose-workflow-button .fa {
+	color: #666;
+	font-size: 28px;
+	position: absolute;
+	margin-top: -14px;
+	top: 50%;
+	left: 10px;
+}
+.z-choose-workflow-button .text-muted {
+	display: block;
+}
+.z-choose-workflow-or {
+	padding-left: 5px;
+	padding-right: 5px;
+}
+.z-chosen-workflow {
+	color: #666;
+}
+
+
+/* Modal dialogs */
+.modal-title {
+	line-height: 20px;
+}
+.modal-footer {
+	padding-top: 15px;
+	padding-bottom: 15px;
+}
+.modal-header,
+.modal-footer {
+	background-color: #f5f5f5;
+	border-color: #ddd;
+}
+.modal-body .z-items .z-table-container {
+	margin: 0;
+}
+.modal-body .z-modal-section {
+	margin: 20px 0;
+}
+.modal-body .z-modal-section:first-child {
+	margin-top: 0;
+}
+.modal-body .z-modal-section:last-child {
+	margin-bottom: 0;
+}
+.modal-header .z-search-bar {
+	margin-bottom: -10px;
+}
+.z-modal-fixed-height {
+	height: 500px;
+	overflow: auto;
+}
+.z-modal-wizard {
+	height: 480px;
+	margin-bottom: -20px;
+}
+.z-workflow-choices .z-workflow .z-items {
+	margin-left: 50px;
+}
+
+
+/* Create items */
+
+.z-create-link .fa {
+	color: #333;
+	font-size: 14px;
+	text-decoration: none;
+	margin-right: 4px;
+}
+.z-create {
+	/*display: flex;
+	display: -webkit-flex;*/
+	clear: left;
+	margin: 0 20px;
+}
+.z-items-tasks .z-create {
+	margin: 0;
+}
+.z-job-panel .z-create-job {
+	margin: 10px 20px;
+}
+.z-create .form-group {
+	margin-bottom: 0;
+}
+.z-create-item-input {
+	/*flex: 1 1 auto;
+	-webkit-flex: 1 1 auto;*/
+	float: left;
+	padding-right: 10px;
+	width: 250px;
+}
+.z-create-input input {
+}
+.z-assignee-input {
+}
+.z-selectize {
+	height: 30px;
+	min-height: 30px;
+	padding: 5px 10px;
+	font-size: 12px;
+	line-height: 1.5;
+	border-radius: 3px;
+}
+
+
+/* Job assets */
+
+.z-job-master-asset {
+	margin-top: 20px;
+	margin-bottom: 30px;
+}
+.z-job-master-asset h5,
+.z-job-master-asset p {
+	line-height: 16px;
+	margin-bottom: 11px;
+}
+.z-job-master-asset p:last-child {
+	margin-bottom: 0;
+}
+.z-job-master-asset .label {
+	margin-top: -2px;
+}
+.z-job-master-asset blockquote {
+	padding: 0 10px;
+	margin: 0;
+}
+.z-asset-link {
+	position: relative;
+}
+.z-asset-link .z-play {
+	position: absolute;
+	color: rgba(0,0,0,0);
+	font-size: 48px;
+	margin-top: -24px;
+	margin-left: -24px;
+	top: 50%;
+	left: 50%;
+}
+.z-asset-link:hover .z-play {
+	color: rgba(0,0,0,0.5);
+}
+
+
+/* Job rate card items */
+
+/* Typeahead stuff */
+
+.tt-query {
+  -webkit-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+     -moz-box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+          box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075);
+}
+
+.tt-hint {
+  color: #999
+}
+
+.tt-dropdown-menu {
+	font-size: 12px;
+	max-height: 300px;
+	overflow: auto;
+	margin-top: 2px;
+	padding: 4px 0;
+	background-color: #fff;
+	border: 1px solid #ccc;
+	border: 1px solid rgba(0, 0, 0, 0.2);
+	-webkit-border-radius: 3px;
+	   -moz-border-radius: 3px;
+	        border-radius: 3px;
+	-webkit-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+	   -moz-box-shadow: 0 5px 10px rgba(0,0,0,.2);
+	        box-shadow: 0 5px 10px rgba(0,0,0,.2);
+}
+.z-items-tasks td .tt-dropdown-menu {
+	margin-top: 8px;
+	width: 200px;
+}
+.tt-suggestion {
+	padding: 3px 20px;
+	line-height: 1.5;
+}
+
+.tt-suggestion.tt-cursor {
+	cursor: default;
+	background-color: #f5f5f5;
+
+}
+.tt-dropdown-menu h6 {
+	margin: 3px 0 0;
+	padding: 3px 10px;
+}
+.tt-suggestion p {
+  margin: 0;
+}
+
+.gist {
+  font-size: 14px;
+}
+
+.datepicker.dropdown-menu {
+	color: inherit;
+	font-family: inherit;
+	font-size: 12px;
+	z-index: 1051 !important;
+}
+
+.twitter-typeahead {
+	display: block !important;
+}
+.z-items-tasks td .twitter-typeahead {
+	display: initial !important;
+}
+/* Project dashboard */
+
+
+/* Search, filters & sort */
+
+.z-search-bar {
+	margin-top: 10px;
+	position: relative;
+}
+.z-search-group {
+	margin-right: 10px;
+	position: relative;
+}
+.z-search-bar .z-search-group input {
+	border-radius: 40em;
+	padding-left: 30px;
+	width: 180px;
+}
+.z-over-input {
+	color: #666;
+	position: absolute;
+	left: 12px;
+	top: 7px;
+}
+.z-search-clear {
+	color: #000;
+	font-size: 18px;
+	line-height: 18px;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
+	opacity: 0.3;
+	padding: 5px 8px;
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.z-search-clear:hover {
+	color: #000;
+	-ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+	opacity: 0.6;
+}
+.z-search-bar .dropdown-menu  {
+	font-size: 12px;
+	max-width: 240px;
+}
+.z-filter .dropdown-menu > li > a {
+	padding-right: 50px;
+	position: relative;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+.z-filter .dropdown-menu > li > a,
+.z-sort .dropdown-menu > li > a {
+	padding-left: 10px;
+}
+.z-filter .dropdown-menu > li > a > .badge {
+	position: absolute;
+	right: 10px;
+}
+.z-sort {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.z-sort .z-sort-label {
+	line-height: 18px;
+	margin: 6px 8px 6px 0;
+}
+.z-hidden-results {
+	padding: 20px;
+	text-align: center;
+}
+.z-highlight {
+	font-weight: 400;
+}
+.z-highlight-on {
+	background-color: #cef3f0;
+}
+
+
+/* Project list */
+
+.z-panel .z-project {
+	margin: 0;
+}
+.nav .z-project a {
+	border-bottom: 1px solid #ddd;
+	border-radius: 0;
+	position: relative;
+}
+.z-project-asset,
+.z-job-asset {
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: cover;
+	display: block;
+	height: 70px;
+	width: 140px;
+	overflow: hidden;
+}
+.z-project-asset {
+	margin-left: 5px;
+	width: 100px;
+}
+.z-project-asset img,
+.z-job-asset img {
+	min-height: 100%;
+	min-width: 100%;
+	opacity: 0;
+}
+.z-project-name,
+.z-project-description,
+.z-project-code,
+.z-project-status,
+.z-project-name,
+.z-project-people,
+.z-project-deadline,
+.z-project-created {
+	position: absolute;
+}
+.z-project-name,
+.z-project-description,
+.z-project-code {
+	left: 130px;
+}
+.z-project-name,
+.z-project-status {
+	top: 10px;
+}
+.z-project-status,
+.z-project-people,
+.z-project-deadline,
+.z-project-created {
+	right: 20px;
+}
+.z-project-code,
+.z-project-description {
+	right: 18em;
+}
+.z-project-code,
+.z-project-deadline {
+	top: 37px;
+}
+.z-project-name {
+	font-size: 16px;
+	right: 140px;
+}
+.z-project-description,
+.z-project-created {
+	top: 60px;
+}
+.z-project-people {
+	bottom: 10px;
+	display: none;
+}
+.z-project-name,
+.z-project-description {
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}	
+.z-project-deadline .z-date,
+.z-project-created .z-date {
+	display: inline-block;
+	text-align: right;
+	width: 6em;
+}
+.z-project-people img,
+.z-extra-people {
+	height: 30px;
+	width: 30px;
+}
+.z-extra-people {
+
+}
+
+
+/* Your jobs list */
+
+.z-panel-right {
+	background-color: #fff;
+	border-left: 6px solid #ddd;
+}
+.z-panel-your-jobs .z-table-container {
+	border: 0;
+	margin: 0 -20px 10px;
+}
+.z-panel-your-jobs .z-items-table {
+	border-collapse: separate; /* seems to fix a weird margin around the table */
+}
+.z-panel-your-jobs .z-items-table td {
+	border-bottom: 1px solid #ddd;
+}
+.z-panel-your-jobs .z-items-table {
+	border-top: 1px solid #ddd;
+}
+.z-panel-your-jobs .z-items:first-child .z-items-table {
+	border-top-width: 0;
+}
+.z-panel-your-jobs .z-items td:hover {
+	cursor: pointer;
+}
+.z-panel-your-jobs .z-items td:first-child {
+	border-left: 0;
+	width: 15px;
+	padding-left: 3px;
+}
+.z-panel-your-jobs .z-items td:last-child {
+	padding-right: 20px;
+	width: 100px;
+}
+.z-panel-your-jobs .z-form-section {
+	border-width: 0;
+}
+.z-items .bg-danger td {
+	background-color: #F7E9E8;
+}
+
+
+/* Forms */
+
+.z-form-section {
+	border-bottom: 1px solid #eee;
+}
+.z-form-section:last-child {
+	border-bottom-width: 0;
+}
+.z-panel-full-content .tab-pane {
+	padding-bottom: 40px;
+}
+.z-form-section {
+	padding: 20px 0;
+}
+.z-form-section h3,
+.z-form-section h4 {
+	margin-top: 0;
+}
+.z-form-view .form-group {
+	margin-bottom: 5px;
+}
+.z-form-control {
+	padding-left: 0;
+}
+.z-brief-toc {
+	margin-right: 30px;
+	position: fixed;
+	top: 230px;
+}
+.z-required {
+	font-size: 9px;
+	position: absolute;
+	right: 5px;
+}
+
+
+/* List of deliverables */
+
+.z-items-deliverables .z-create,
+.z-items-deliverables .z-table-container,
+.z-deliverables-panel {
+	margin-left: 0;
+	margin-right: 0;
+}
+.z-items .z-table-nomargin {
+	margin-bottom: 0;
+}
+.z-deliverables-panel {
+	border-radius: 0;
+	margin-bottom: 0;
+	border-bottom-width: 0;
+}
+.z-deliverables-panel:last-child {
+	margin-bottom: -20px;
+}
+.z-deliverables-panel .panel-heading {
+	background-color: #e5e5e5;
+	border-radius: 0;
+	padding: 5px 15px;
+}
+.z-deliverables-panel .panel-heading .text-muted {
+	color: #777;
+}
+.z-items-deliverables .table th:first-child, 
+.z-items-deliverables .table td:first-child {
+	border-left-width: 0;
+	padding-left: 10px;
+}
+.z-items-deliverables .table th {
+	background-color: #f5f5f5;
+	border-top: 0;
+	border-bottom: 1px solid #ddd;
+}
+.z-items-deliverables .table {
+	table-layout: auto;
+}
+.z-item-quantity input {
+	max-width: 60px;
+}
+.z-items-deliverables .table th:first-child, 
+.z-items-deliverables .table td:first-child {
+	border-left-width: 0;
+	padding-left: 10px;
+}
+.z-items-deliverables .table th {
+	background-color: #f5f5f5;
+	border-top: 0;
+	border-bottom: 1px solid #ddd;
+}
+.z-items-deliverables .table {
+	table-layout: auto;
+}
+.z-item-executions input {
+	max-width: 60px;
+}
+.z-toolbar-formatting {
+	margin-bottom: 5px;
+}
+
+/* Workflow sidebar */
+
+.z-workflow label {
+	display: block;
+	line-height: 20px;
+	margin-bottom: 0;
+	padding: 10px 20px 10px 50px;
+	position: relative;
+}
+.z-workflow.active label {
+	background-color: #e3f1ff;
+}
+.z-workflow .z-expander {
+	height: 40px;
+	padding-left: 0;
+	width: 30px;
+}
+.z-workflow .z-expander {
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+.nav .z-workflow-item > a {
+	padding-left: 30px;
+}
+.z-workflow-version-editor,
+.z-workflow-version-date {
+	position: absolute;
+}
+.z-workflow-version-editor {
+	left: 250px;
+}
+.z-workflow-version-date {
+	right: 0;
+}
+.z-panel-right .z-workflow .z-items {
+	margin-left: 0;
+}
+.z-panel-right .z-workflow .z-items .z-table-container {
+	margin-top: 0;
+}
+.z-panel-right .z-workflow label {
+	padding-left: 30px;
+	margin-bottom: 0;
+}
+
+/* Job grid view */
+
+.z-grid-view .z-job.active {
+	background-color: transparent;
+}
+.z-grid-view  .z-job-list .z-job {
+	border-bottom-width: 0;
+	height: 170px;
+	margin-top: 10px;
+	padding: 0;
+}
+.z-grid-view .z-job-list {
+	float: left;
+	padding: 0 10px;
+	width: 100%;
+}
+.z-grid-view .z-job-list .z-job > a {
+	box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+	height: 100%;
+	margin: 0 10px;
+}
+.z-grid-view .z-job-list .z-job > a:hover {
+	background-color: #eee;
+}
+.z-grid-view .z-job-list .z-job-asset {
+	height: 115px;
+	width: 100%;
+}
+.z-grid-view .z-job-list .z-checkbox {
+	top: auto;
+	bottom: 58px;
+	left: 3px;
+	z-index: 100;
+}
+.z-grid-view .z-job-name {
+	font-size: 14px;
+	top: 119px;
+	left: 8px;
+	right: 8px;
+}
+.z-grid-view .z-job-code {
+	top: 138px;
+	left: 8px;
+	right: 8px;
+	display: none;
+}
+.z-asset-overlay {
+	background-color: rgba(0,0,0,0.5);
+	color: #fff;
+	font-weight: 300;
+	line-height: 16px;
+	padding: 0 4px;
+	position: absolute;
+}
+.z-asset-type {
+	top: 0;
+	left: 0;
+}
+.z-grid-view .z-duration {
+	bottom: 45px;
+	right: 0;
+}
+.z-grid-view .z-job-status {
+	top: 143px;
+	left: 8px;
+	right: auto;
+}
+.z-grid-view .z-job .z-expander,
+.z-grid-view .z-job-deadline,
+.z-grid-view .z-items {
+	display: none;
+}
+
+/* Job list view */
+
+.z-list-view .z-job-list .z-expander {
+	display: none;
+}
+.z-list-view .z-job-list .z-checkbox {
+	left: 30px;
+}
+.z-list-view .z-job-list .z-job-name, 
+.z-list-view .z-job-list .z-job-code,
+.z-list-view .z-job-list .z-job-status {
+	left: 165px;
+}
+.z-list-view .z-job-list .z-job-code {
+	display: none;
+}
+.z-list-view .z-job-list .z-job-status {
+	right: auto;
+}
+.z-list-view .z-job-list .z-job-asset {
+	height: 50px;
+	top: 5px;
+	left: 55px;
+	position: absolute;
+	width: 100px;
+}
+.z-list-view .z-asset-type {
+	display: none;
+	left: 40px;
+}
+
+.z-list-view .z-duration {
+	display: none;
+	bottom: 0;
+	left: 70px;
+}
+
+
+/* Activity */
+
+.z-activity-filter {
+	display: block;
+}
+.z-activity-post {
+	border-bottom: 1px solid #eee;
+	clear: both;
+	margin: 0;
+	padding: 15px 0;
+}
+.z-activity-post-add { 
+	padding-top: 0;
+}
+.z-activity-post .z-profile-picture {
+	height: 30px;
+	margin-right: 10px;
+	width: 30px;
+}
+.z-activity-comment {
+	font-size: 14px;
+	margin: 10px 0;
+	padding: 0 10px;
+}
+.z-activity-time {
+	margin-bottom: 0;
+}
+.z-activity-replies {
+	margin: 10px 0 0;
+	padding: 0 10px;
+}
+.z-activity-replies .z-activity-post {
+	margin: 0;
+	padding: 10px 0;
+}
+.z-activity-replies .z-activity-post-add {
+	border-bottom: 0;
+	margin: 0;
+}
+.z-activity-post .form-group {
+	margin-bottom: 0;
+}
+.z-activity-post-textarea:focus {
+	min-height: 100px;
+}
+.z-activity-post-button {
+	margin-top: 10px;
+}
+.z-activity-editsummary {
+	table-layout: fixed;
+}
+.z-activity-editsummary-field {
+	width: 20%;
+}
+
+/* Files */
+
+.z-drop-hint {
+	margin: 5px 0 5px 10px;
+}
+.z-drop-hint .fa-cloud-upload {
+	color: #f38a31;
+}
+
+.z-files-table {
+	table-layout: fixed;
+}
+.z-files-table > tbody > tr.active > td {
+	background-color: #e3f1ff;
+}
+.z-files-table .z-file-select {
+	padding-left: 20px;
+	width: 40px;
+}
+.z-files-table .z-file {
+	width: 40%;
+}
+.z-files-table .z-added-date {
+	width: 25%;
+}
+
+/* Assets modal */
+
+.z-panel-filter {
+	right: auto;
+	width: 200px;
+	border-right: 1px solid #ddd;
+}
+.z-panel-filter h3 {
+	margin: 10px 15px;
+}
+.z-panel-filter .panel {
+	border-radius: 0;
+	border-width: 0;
+	border-top: 1px solid #ddd;
+	box-shadow: none;
+	margin: 0;
+}
+.z-panel-filter .panel-heading {
+	background-color: transparent;
+	border-width: 0;
+}
+.z-panel-filter .panel-heading a {
+	color: #666;
+	text-decoration: none;
+}
+.z-panel-filter .panel-body {
+	padding: 0 15px;
+}
+.z-panel-filter .panel-body .checkbox {
+	margin: 0 0 5px;
+	padding-right: 33px;
+}
+.z-panel-filter .checkbox label {
+	padding-left: 17px;
+}
+.z-panel-filter .checkbox input[type="checkbox"] {
+	margin-left: -17px;
+	margin-top: 3px;
+}
+.z-panel-filter .badge {
+	position: absolute;
+	right: 0;
+	top: 0;
+}
+.z-panel-filter-assets {
+	background-color: #f5f5f5;
+	left: 200px;
+	padding: 10px 0;
+}
+.z-panel-wizard {
+	transition: left 0.3s, right 0.3s;
+	width: 100%;
+	overflow: hidden;
+}
+.z-panel-wizard-groups {
+	padding: 20px;
+	left: 100%;
+	width: 100%;
+}
+.z-modal-wizard-2 .z-panel-wizard-assets {
+	right: 100%;
+	left: -100%;
+}
+.z-modal-wizard-2 .z-panel-wizard-groups {
+	left: 0;
+}
+
+
+/* Estimate */
+
+.z-table-estimate {
+	margin-bottom: 0;
+	table-layout: fixed;
+}
+.z-table-estimate th {
+	background-color: transparent;
+	color: #666;
+}
+.table .z-table-estimate-job td {
+	background-color: #f5f5f5;
+	border-top: 1px solid #ddd;
+	font-size: 12px;
+	font-weight: 600;
+	color: #666;
+	padding: 5px 8px;
+}
+.z-mode-view-estimate .z-table-estimate-category {
+	width: 20%;
+}
+.z-mode-view-estimate .z-table-estimate-service {
+	width: 40%;
+}
+.z-mode-view-estimate .z-table-estimate-unitprice {
+	width: 14%;
+}
+.z-mode-view-estimate .z-table-estimate-quantity {
+	width: 12%;
+}
+.z-mode-view-estimate .z-table-estimate-linetotal {
+	width: 14%;
+}
+.z-mode-edit-estimate .z-table-estimate-category {
+	width: 16%;
+}
+.z-mode-edit-estimate .z-table-estimate-service {
+	width: 36%;
+}
+.z-mode-edit-estimate .z-table-estimate-unitprice {
+	width: 13%;
+}
+.z-mode-edit-estimate .z-table-estimate-quantity {
+	width: 10%;
+}
+.z-mode-edit-estimate td.z-table-estimate-quantity {
+	padding-top: 3px;
+	padding-bottom: 3px;
+}
+.z-mode-edit-estimate .z-table-estimate-linetotal {
+	width: 12%;
+}
+.z-mode-edit-estimate .z-table-estimate-options {
+	width: 13%;
+}
+.z-panel-services {
+	margin: 20px 0 30px;
+	border-radius: 0;
+}
+.panel-default .z-panel-heading-nocheckbox {
+	padding-left: 30px;
+}
+.z-create-service {
+	border-top: 1px solid #ddd;
+	margin: 0;
+	padding: 10px;
+}
+.table .z-services-package td {
+	border-top-width: 0;
+}
+.z-mode-view-estimate .table .z-services-package td {
+	padding-top: 0;
+	padding-bottom: 8px;
+}
+.z-items-services-total .table {
+	background-color: #f5f5f5;
+	border: 1px solid #ddd;
+	font-size: 18px;
+	table-layout: auto;
+}
+.z-table-estimate-grandtotal {
+	width: 5%;
+}
+.z-panel-heading-aside {
+	position: absolute;
+	right: 8px;
+}
+.z-mode-edit-estimate .z-panel-heading-aside {
+	right: 13%;
+	padding-right: 8px;
+}
+.z-strikethrough {
+	text-decoration: line-through;
+}
+.z-service-comment {
+	display: block;
+}
+.z-items-services ins {
+	text-decoration: none;
+	font-style: italic;
+}
+.z-panel-services h1,
+.z-panel-services h2 {
+	margin: 10px 0;
+}
+.z-panel-services h1 {
+	font-size: 20px;
+}
+.z-panel-services h2 {
+	font-size: 16px;
+}
+
+
+/* Alerts */
+
+.z-panel-lg-header-alert {
+	top: 131px;
+}
+.alert {
+	border-left-width: 0;
+	border-right-width: 0;
+	border-top-width: 0;
+	padding: 10px 20px 9px;
+	margin: 0;
+}
+
+
