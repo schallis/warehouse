@@ -9,7 +9,14 @@
     <link rel="stylesheet" href="{% static "lib/bootstrap/css/bootstrap.css" %}">
     <link rel="stylesheet" href="{% static "lib/font-awesome/css/font-awesome.css" %}">
     <style>
-        body {padding-top: 100px}
+        @import url({% static "fonts/open-sans-fontface/Light/OpenSans-Light.ttf"});
+        body {
+            font-family: 'Open Sans Light', 'Open Sans';
+            padding-top: 100px;
+        }
+        h1, h2, h3 {
+            color: #777;
+        }
         .pod {
             background-color: #fafafa;
             border-radius: 10px;
@@ -80,7 +87,39 @@
     {% endfor %}
 
     <div class="row">
-        <div class="col-md-6">
+
+        <div class="col-md-7">
+            <div class="pod">
+                <h2>Recent Syncs</h2>
+                <p>Data is this dashboard is only as up-to-date as the most recent sync for any given site.</p>
+                <table class="table">
+                    <tr>
+                        <th>Domain</th>
+                        <!--<th>Start</th>-->
+                        <th>End</th>
+                        <th>Status</th>
+                    </tr>
+                {% for sync in last_syncs %}
+                <tr>
+                    <td><a href="{% url 'reporting.views.domain' sync.site.domain  %}">{{sync.site.domain}}</a></td>
+                    <!--<td>{{sync.start_time}}</td>-->
+                    <td>{{sync.end_time}}</td>
+                    <td>{% if sync.completed %}
+                        <i class="fa fa-check">
+                    {% else %}
+                        {% if sync.end_time %}
+                            <i class="fa fa-close">
+                        {% else %}
+                            <i class="fa fa-refresh fa-spin">
+                        {% endif %}
+                    {% endif %}</i></td>
+                </tr>
+                {% endfor %}
+                </table>
+            </div>
+        </div>
+
+        <div class="col-md-5">
             <div class="pod">
                 <h2>Top uploaders</h2>
                 {{ uploader_by_site}}
@@ -93,29 +132,6 @@
                 <tr>
                     <td>{{site.asset__username}}</td>
                     <td>{{site.count}}</td>
-                </tr>
-                {% endfor %}
-                </table>
-            </div>
-        </div>
-
-        <div class="col-md-6">
-            <div class="pod">
-                <h2>Recent Syncs</h2>
-                <p>Data is this dashboard is only as up-to-date as the most recent sync for any given site.</p>
-                <table class="table">
-                    <tr>
-                        <th>Domain</th>
-                        <th>Start</th>
-                        <th>End</th>
-                        <th>Completed?</th>
-                    </tr>
-                {% for sync in last_syncs %}
-                <tr>
-                    <td><a href="{% url 'reporting.views.domain' sync.site.domain  %}">{{sync.site.domain}}</a></td>
-                    <td>{{sync.start_time}}</td>
-                    <td>{{sync.end_time}}</td>
-                    <td>{{sync.completed}}</td>
                 </tr>
                 {% endfor %}
                 </table>

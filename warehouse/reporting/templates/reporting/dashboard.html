@@ -2,14 +2,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
+    <meta charset="utf-4">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="author" content="Steven Challis">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <link rel="stylesheet" href="{% static "lib/bootstrap/css/bootstrap.css" %}">
     <link rel="stylesheet" href="{% static "lib/font-awesome/css/font-awesome.css" %}">
     <style>
-        body {padding-top: 100px}
+        @import url({% static "fonts/open-sans-fontface/Light/OpenSans-Light.ttf"});
+        body {
+            font-family: 'Open Sans Light', 'Open Sans';
+            padding-top: 100px;
+        }
+        h1, h2, h3 {
+            color: #777;
+        }
         .pod {
             background-color: #fafafa;
             border-radius: 10px;
@@ -24,7 +31,7 @@
             text-align: center;
             margin-bottom: 20px;
         }
-        .view-all {
+        .center {
             text-align: center;
         }
         dt {font-weight: normal ; width: 80%; float: left;}
@@ -42,15 +49,14 @@
 <div class="container-fluid" id="content-main">
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="pod">
             <h2>Storage <small>(by site)</small></h2>
-            <div id="graph-usage">Loading...</div>
-            <p class="view-all"><a href="">View full report</a></p>
+            <div id="graph-usage"><p class="center"><i class="fa fa-spinner fa-spin fa-2x"></i> Loading...</p></div>
             </div>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-8">
             <div class="pod">
             <h2>Usage <small>(by site)</small>
                 <div class="dropdown pull-right">
@@ -96,15 +102,47 @@
             <th>{{sizes.uploaders}}</th>
         </tr>
         </table>
-        <p class="view-all"><a href="">View full report</a></p>
         </div>
         </div>
     </div> <!-- /row -->
 
     <div class="row row-padding">
-        <div class="col-md-6">
+
+        <div class="col-md-7">
             <div class="pod">
-                <h2>Uploaders</h2>
+            <h2>Syncing</h2>
+            <p>Data is this dashboard is only as up-to-date as the most recent sync for any given site.</p>
+            <table class="table">
+                <tr>
+                    <th>Domain</th>
+                    <!--<th>Start</th>-->
+                    <th>End</th>
+                    <th>Status</th>
+                </tr>
+            {% for sync in last_syncs %}
+            <tr>
+                <td><a href="{% url 'reporting.views.domain' sync.site.domain  %}">{{sync.site.domain}}</a></td>
+                <!--<td>{{sync.start_time}}</td>-->
+                <td>{{sync.end_time}}</td>
+                <td>{% if sync.completed %}
+                    <i class="fa fa-check">
+                {% else %}
+                    {% if sync.end_time %}
+                        <i class="fa fa-close">
+                    {% else %}
+                        <i class="fa fa-refresh fa-spin">
+                    {% endif %}
+                {% endif %}</i></td>
+            </tr>
+            {% endfor %}
+            </table>
+            <p class="center"><a href="">View full report</a></p>
+            </div>
+        </div>
+
+        <div class="col-md-5">
+            <div class="pod">
+                <h2>Top Uploaders</h2>
                 {{ uploader_by_site}}
                 <table class="table">
                     <tr>
@@ -120,44 +158,10 @@
                 </tr>
                 {% endfor %}
                 </table>
-                <p class="view-all"><a href="">View full report</a></p>
+                <p class="center"><a href="">View full report</a></p>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="pod">
-            <h2>Syncing
-                <div class="dropdown pull-right">
-                    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Options
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li role="presentation">
-                            <a role="menuitem" href="">Sync now</a>
-                        </li>
-                    </ul>
-                </div>
-            </h2>
-            <p>Data is this dashboard is only as up-to-date as the most recent sync for any given site.</p>
-            <table class="table">
-                <tr>
-                    <th>Domain</th>
-                    <!--<th>Start</th>-->
-                    <th>End</th>
-                    <th>Completed?</th>
-                </tr>
-            {% for sync in last_syncs %}
-            <tr>
-                <td><a href="{% url 'reporting.views.domain' sync.site.domain %}">{{sync.site.domain}}</a></td>
-                <!--<td>{{sync.start_time}}</td>-->
-                <td>{{sync.end_time}}</td>
-                <td>{{sync.completed}}</td>
-            </tr>
-            {% endfor %}
-            </table>
-            <p class="view-all"><a href="">View full report</a></p>
-            </div>
-        </div>
     </div> <!-- /row -->
 
 </div>

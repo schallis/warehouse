@@ -97,8 +97,9 @@ def dashboard(request):
             .annotate(count=Count('asset')).order_by('-count')[:10]
     x = [x for x in all_sites.values('domain')
             .annotate(size=Count('asset__shape'))
-            .values_list('domain', 'size')
-            .order_by('-size')]
+            .annotate(total=Sum('asset__shape__size'))
+            .order_by('-size')  # TODO: Figure out why sorting by total is buggy
+            .values_list('domain', 'size')]
     graph_assets_data = x[:5]
     graph_assets_data = [[x,y,reverse('reporting.views.domain', args=(x,))] for x, y in graph_assets_data]
     # [["teamhills.zonza.tv", null], ["deluxe.zonza.tv", null], ["trials.zonza.tv", 243497942962], ["grey.zonza.tv", 135888998176], ["230pas.zonza.tv", 48393166596], ["zonzacompany.zonza.tv", 5456789214], ["trg-deluxe.zonza.tv", 2953964488], ["gmi-deluxe.zonza.tv", 2182796439]]'
