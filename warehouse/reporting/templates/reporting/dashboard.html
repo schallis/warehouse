@@ -24,8 +24,10 @@
             margin-bottom: 30px;
         }
         .indicator {
-            width: 20px;
+            width: 10px;
             height: 20px;
+            display: inline-block,
+            vertical-align: middle,
         }
         .sc-donut-chart-graph {
             text-align: center;
@@ -33,6 +35,15 @@
         }
         .center {
             text-align: center;
+        }
+        .stat {
+            padding: 10px 20px;
+            border-radius: 50px;
+            background: #2bcabf;
+            margin-bottom: 20px;
+            display: inline-block;
+            color: #fff;
+            font-size: 1.5em;
         }
         dt {font-weight: normal ; width: 80%; float: left;}
         dd {float: right; color: #aaa}
@@ -43,9 +54,10 @@
 {% block content %}
 <nav class="navbar navbar-fixed-top navbar-inverse">
     <div class="container-fluid">
-    <span class="navbar-brand">Reports Dashboard</span>
+        <span class="navbar-brand">Reports Dashboard</span>
+    </div>
 </nav>
-</div>
+
 <div class="container-fluid" id="content-main">
 
     <div class="row">
@@ -58,55 +70,84 @@
 
         <div class="col-md-8">
             <div class="pod">
-            <h2>Usage <small>(by site)</small>
-                <div class="dropdown pull-right">
-                    <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Options
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                        <li role="presentation">
-                           <a role="menuitem" href="{% url 'reporting.views.download_csv' %}">Download report</a>
-                        </li>
-                    </ul>
-                </div>
-            </h2>
-        <table class="table">
-            <tr>
-                <th>Domain</th>
-                <th>Total Size</th>
-                <th>Assets</th>
-                <th>Transcodes</th>
-                <th>Uploaders</th>
-            </tr>
-        {% for site in size_by_site %}
-        <tr>
-            <td><a href="{% url 'reporting.views.domain' site.domain  %}">{{site.domain}}</a></td>
-            <td>{{site.size|filesizeformat}}</td>
-            <td>{{site.count}}</td>
-            <td>{{site.transcodes}}</td>
-            <td>{{site.uploaders}}</td>
-        </tr>
-        {% endfor %}
-        <tr>
-            <td></td>
-            <td>...</td>
-            <td>...</td>
-            <td>...</td>
-            <td>...</td>
-        </tr>
-        <tr>
-            <td>Total</td>
-            <th>{{sizes.size|filesizeformat}}</th>
-            <th>{{sizes.count}}</th>
-            <th>{{sizes.transcodes}}</th>
-            <th>{{sizes.uploaders}}</th>
-        </tr>
-        </table>
-        </div>
+                <h2>Usage
+                    <div class="dropdown pull-right">
+                        <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Options
+                            <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li role="presentation">
+                               <a role="menuitem" href="{% url 'reporting.views.download_csv' %}">Download report</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <small>(by site)</small>
+                </h2>
+                <table class="table">
+                    <tr>
+                        <th>Domain</th>
+                        <th>Total Size</th>
+                        <th>Assets</th>
+                        <th>Transcodes</th>
+                        <th>Uploaders</th>
+                    </tr>
+                {% for site in size_by_site %}
+                <tr>
+                    <td><a href="{% url 'reporting.views.domain' site.domain %}">{{site.domain}}</a></td>
+                    <td>{{site.size|filesizeformat}}</td>
+                    <td>{{site.count}}</td>
+                    <td>{{site.transcodes}}</td>
+                    <td>{{site.uploaders}}</td>
+                </tr>
+                {% endfor %}
+                <tr>
+                    <td></td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                    <td>...</td>
+                </tr>
+                <tr>
+                    <td>Total</td>
+                    <th>{{sizes.size|filesizeformat}}</th>
+                    <th>{{sizes.count}}</th>
+                    <th>{{sizes.transcodes}}</th>
+                    <th>{{sizes.uploaders}}</th>
+                </tr>
+                </table>
+            </div>
         </div>
     </div> <!-- /row -->
 
-    <div class="row row-padding">
+
+    <div class="row">
+        <div class="col-md-3">
+            <div class="pod center">
+                <h2>Total Size</h2>
+                <div class="stat">{{sizes.size|filesizeformat}}</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="pod center">
+                <h2>Assets</h2>
+                <span class="stat">{{sizes.count}}</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="pod center">
+                <h2>Transcodes</h2>
+                <span class="stat">{{sizes.transcodes}}</span>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="pod center">
+                <h2>Uploaders</h2>
+                <span class="stat">{{sizes.uploaders}}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
 
         <div class="col-md-7">
             <div class="pod">
@@ -121,7 +162,7 @@
                 </tr>
             {% for sync in last_syncs %}
             <tr>
-                <td><a href="{% url 'reporting.views.domain' sync.site.domain  %}">{{sync.site.domain}}</a></td>
+                <td><a href="{% url 'reporting.views.domain' sync.site.domain %}">{{sync.site.domain}}</a></td>
                 <!--<td>{{sync.start_time}}</td>-->
                 <td>{{sync.end_time}}</td>
                 <td>{% if sync.completed %}
@@ -265,14 +306,9 @@
           var createItem = function(item){
               var indicatorStyle = {
                   backgroundColor: item.color,
-                  height: 20,
-                  width: 20,
-                  display: 'inline-block',
-                  verticalAlign: 'middle',
-                  marginRight: 10,
               }
               return <tr>
-                <td><div style={indicatorStyle}></div></td>
+                <td><div className='indicator' style={indicatorStyle}></div></td>
                 <td><a href={item.url}>{item.domain}</a></td>
                 <td>{item.size}</td>
               </tr>
@@ -280,7 +316,9 @@
           }
             return <div className="sc-donut-chart">
                 <SCDonutChartGraph data={data} label={this.props.label} size={this.props.size} />
-                <table className="table">{data.map(createItem)}</table>
+                <table className="table">
+                    {data.map(createItem)}
+                </table>
             </div>
         }
       });

@@ -4,8 +4,8 @@ from datetime import datetime
 import logging
 import uuid
 
-from multiprocessing import Pool
-from multiprocessing.dummy import Pool as ThreadPool
+#from multiprocessing import Pool
+#from multiprocessing.dummy import Pool as ThreadPool
 
 from django.db import transaction, IntegrityError
 from django.utils import timezone
@@ -14,8 +14,6 @@ from django.core.management.base import BaseCommand
 from reporting.models import (Asset, Shape, get_asset, SyncRun, Site, dump_json,
                               get_shapes_for_asset, get_shape, asset_iterator)
 
-from threading import Lock
-import time
 
 log = logging.getLogger(__name__)
 
