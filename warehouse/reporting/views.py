@@ -67,6 +67,7 @@ def download_csv(domain):
     return response
 
 
+@staff_member_required
 def dashboard(request):
     """Give a snapshot of the status of the reporting app"""
     sync_runs = SyncRun.objects.all().order_by('-start_time')
