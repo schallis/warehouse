@@ -1,172 +1,104 @@
-{% load staticfiles %}
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="author" content="Steven Challis">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
-    <link rel="stylesheet" href="{% static "lib/bootstrap/css/bootstrap.css" %}">
-    <link rel="stylesheet" href="{% static "lib/font-awesome/css/font-awesome.css" %}">
-    <style>
-        @import url({% static "fonts/open-sans-fontface/Light/OpenSans-Light.ttf"});
-        body {
-            font-family: 'Open Sans Light', 'Open Sans';
-            padding-top: 100px;
-        }
-        h1, h2, h3 {
-            color: #777;
-        }
-        .pod {
-            background-color: #fafafa;
-            border-radius: 10px;
-            padding: 1px 10px;
-            margin-bottom: 30px;
-        }
-        .indicator {
-            width: 20px;
-            height: 20px;
-        }
-        .sc-donut-chart-graph {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .center {
-            text-align: center;
-        }
-        .stat {
-            padding: 10px 20px;
-            border-radius: 50px;
-            background: #2bcabf;
-            margin-bottom: 20px;
-            display: inline-block;
-            color: #fff;
-            font-size: 1.5em;
-        }
-        dt {font-weight: normal ; width: 80%; float: left;}
-        dd {float: right; color: #aaa}
-    </style>
-</head>
-<body>
+{% extends 'reporting/base.html' %}
 
 {% block content %}
-<nav class="navbar navbar-fixed-top navbar-inverse">
-    <div class="container-fluid">
-        <span class="navbar-brand">Reporting - {{domain}}</span>
-</nav>
+<div class="row">
+    <div class="col-md-12">
+        <div class="dropdown pull-right">
+            <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Options
+                <span class="caret"></span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li role="presentation">
+                   <a role="menuitem" href="{% url 'reporting.views.download_csv' %}">Download report</a>
+                </li>
+                <li role="presentation">
+                   <a role="menuitem" href="{% url 'reporting.views.download_csv' %}">Print report</a>
+                </li>
+            </ul>
+        </div>
+    </div>
 </div>
-<div class="container-fluid" id="content-main">
 
-
-    <div class="row">
-        <div class="col-md-12">
-            <div class="dropdown pull-right">
-                <button class="btn btn-default dropdown-toggle" type="button" data-toggle="dropdown">Options
-                    <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu" role="menu">
-                    <li role="presentation">
-                       <a role="menuitem" href="{% url 'reporting.views.download_csv' %}">Download report</a>
-                    </li>
-                    <li role="presentation">
-                       <a role="menuitem" href="{% url 'reporting.views.download_csv' %}">Print report</a>
-                    </li>
-                </ul>
-            </div>
+{% for site in size_by_site %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="pod center">
+            <h2>Total Size</h2>
+            <div class="stat">{{site.size|filesizeformat}}</div>
         </div>
     </div>
-
-    {% for site in size_by_site %}
-    <div class="row">
-        <div class="col-md-3">
-            <div class="pod center">
-                <h2>Total Size</h2>
-                <div class="stat">{{site.size|filesizeformat}}</div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="pod center">
-                <h2>Assets</h2>
-                <span class="stat">{{site.count}}</span>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="pod center">
-                <h2>Transcodes</h2>
-                <span class="stat">{{site.transcodes}}</span>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="pod center">
-                <h2>Uploaders</h2>
-                <span class="stat">{{site.uploaders}}</span>
-            </div>
+    <div class="col-md-3">
+        <div class="pod center">
+            <h2>Assets</h2>
+            <span class="stat">{{site.count}}</span>
         </div>
     </div>
-    {% endfor %}
+    <div class="col-md-3">
+        <div class="pod center">
+            <h2>Transcodes</h2>
+            <span class="stat">{{site.transcodes}}</span>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="pod center">
+            <h2>Uploaders</h2>
+            <span class="stat">{{site.uploaders}}</span>
+        </div>
+    </div>
+</div>
+{% endfor %}
 
-    <div class="row">
+<div class="row">
 
-        <div class="col-md-7">
-            <div class="pod">
-                <h2>Recent Syncs</h2>
-                <p>Data is this dashboard is only as up-to-date as the most recent sync for any given site.</p>
-                <table class="table">
-                    <tr>
-                        <th>Domain</th>
-                        <th>Start</th>
-                        <th>End</th>
-                        <th>Status</th>
-                    </tr>
-                {% for sync in last_syncs %}
+    <div class="col-md-7">
+        <div class="pod">
+            <h2>Recent Syncs</h2>
+            <p>Data is this dashboard is only as up-to-date as the most recent sync for any given site.</p>
+            <table class="table">
                 <tr>
-                    <td><a href="{% url 'reporting.views.domain' sync.site.domain  %}">{{sync.site.domain}}</a></td>
-                    <td>{{sync.start_time}}</td>
-                    <td>{{sync.end_time}}</td>
-                    <td>{% if sync.completed %}
-                        <i class="fa fa-check">
+                    <th>Domain</th>
+                    <th>Start</th>
+                    <th>End</th>
+                    <th>Status</th>
+                </tr>
+            {% for sync in last_syncs %}
+            <tr>
+                <td><a href="{% url 'reporting.views.domain' sync.site.domain  %}">{{sync.site.domain}}</a></td>
+                <td>{{sync.start_time}}</td>
+                <td>{{sync.end_time}}</td>
+                <td>{% if sync.completed %}
+                    <i class="fa fa-check">
+                {% else %}
+                    {% if sync.end_time %}
+                        <i class="fa fa-close">
                     {% else %}
-                        {% if sync.end_time %}
-                            <i class="fa fa-close">
-                        {% else %}
-                            <i class="fa fa-refresh fa-spin">
-                        {% endif %}
-                    {% endif %}</i></td>
-                </tr>
-                {% endfor %}
-                </table>
-            </div>
+                        <i class="fa fa-refresh fa-spin">
+                    {% endif %}
+                {% endif %}</i></td>
+            </tr>
+            {% endfor %}
+            </table>
         </div>
+    </div>
 
-        <div class="col-md-5">
-            <div class="pod">
-                <h2>Top uploaders</h2>
-                {{ uploader_by_site}}
-                <table class="table">
-                    <tr>
-                        <th>Username</th>
-                        <th>Uploads</th>
-                    </tr>
-                {% for site in top_uploaders%}
+    <div class="col-md-5">
+        <div class="pod">
+            <h2>Top uploaders</h2>
+            {{ uploader_by_site}}
+            <table class="table">
                 <tr>
-                    <td>{{site.asset__username}}</td>
-                    <td>{{site.count}}</td>
+                    <th>Username</th>
+                    <th>Uploads</th>
                 </tr>
-                {% endfor %}
-                </table>
-            </div>
+            {% for site in top_uploaders%}
+            <tr>
+                <td>{{site.asset__username}}</td>
+                <td>{{site.count}}</td>
+            </tr>
+            {% endfor %}
+            </table>
         </div>
+    </div>
 
-    </div> <!-- /row -->
-
-</div>
+</div> <!-- /row -->
 {% endblock %}
-    <script src="{% static "lib/jquery-1.9.1.js" %}"></script>
-    <script src="{% static "lib/bootstrap/js/bootstrap.js" %}"></script>
-    <script src="{% static "lib/react-0.12.2/build/react-with-addons.js" %}"></script>
-    <script src="{% static "lib/react-0.12.2/build/JSXTransformer.js" %}"></script>
-    <script src="{% static "lib/d3.js" %}"></script>
-
-</body>
-</html>
