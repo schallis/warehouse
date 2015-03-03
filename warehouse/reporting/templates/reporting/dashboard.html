@@ -324,7 +324,7 @@
       });
 
       var label = "{{sizes.size|filesizeformat}}";
-      var total = {{sizes|safe}};
+      var total = {{sizes_json|safe}};
       var data = {{graph_assets_data|safe}} // [["domain", num, url],]
 
       React.render(<SCDonutChart data={data} label={label} size="200" />,
