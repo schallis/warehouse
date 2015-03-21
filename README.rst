@@ -9,6 +9,16 @@ Warehouse
 .. image:: https://github.com/schallis/warehouse/raw/via_api/screenshot.png
 
 
+Graphs
+------
+Graph drawing is done with React.js and D3.js as SVG
+
+CSV Reports
+-----------
+
+Reports are generated directly from Postgres. Since it's storing metadata as
+JSON, arbitrary fields can be configured in the report. It's also super fast :)
+
 
 Development
 -----------
@@ -51,24 +61,6 @@ interface exposed at ``/admin``.
 
 NOTE: Data collection is done in parallel using multithreading (to maximise API
 concurrency)
-
-CSV Reports
------------
-
-NOTE: Since data collection happens iteratively, you should only report on data
-from any one sync for highest accuracy. All reportable data is linked to the
-sync it was found in so simply join and filter on that.
-
-The ``reporting`` app also comes bundled with a selection of tools to generate
-common reports. These are easy to generate from the shell::
-
-    $ ./manage.py shell
-    >>> from reporting.reports import IngestReport
-    >>> report = IngestReport()
-    >>> report.serialize()
-    /var/folders/vf/zhts9frj5tlbykc_tqw1st4r0000gp/T/tmpbl1Vjt
-    <closed file '<fdopen>', mode 'w+b' at 0x10f376810>
-
 
 TODO
 ----
