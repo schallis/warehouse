@@ -5,6 +5,11 @@ Warehouse
 :Authors: Steven Challis <steve@stevechallis.com>
 :Requires: Django >= 1.7 (see requirements.pip)
 
+
+.. image:: https://github.com/schallis/warehouse/raw/via_api/screenshot.png
+
+
+
 Development
 -----------
 
